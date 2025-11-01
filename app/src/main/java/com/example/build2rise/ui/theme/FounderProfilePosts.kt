@@ -23,25 +23,19 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 
-data class Post(val title: String, val type: String, val updated: String)
-
-val samplePosts = listOf(
-    Post("Title", "video", "updated today"),
-    Post("Title", "image", "updated yesterday"),
-    Post("Title", "video", "updated 2 days ago"),
-    Post("Title", "image", "updated 3 days ago"),
-    Post("Title", "video", "updated this week"),
-    Post("Title", "image", "updated last week")
+data class FounderPost(val title: String, val type: String, val updated: String)
+val founderPosts = listOf(
+    FounderPost("Title", "video", "updated today"),
+    FounderPost("Title", "image", "updated yesterday"),
+    FounderPost("Title", "video", "updated 2 days ago"),
+    FounderPost("Title", "image", "updated 3 days ago"),
+    FounderPost("Title", "video", "updated this week"),
+    FounderPost("Title", "image", "updated last week")
 )
-
 @Composable
-fun InvestorProfilePosts() {
+fun FounderProfilePosts() {
+
     var selectedBottomTab by remember { mutableStateOf("Profile") }
     var selectedProfileTab by remember { mutableStateOf("Posts") }
 
@@ -55,39 +49,53 @@ fun InvestorProfilePosts() {
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-
                 BottomTab("Feed", Icons.Filled.Home, selectedBottomTab) { selectedBottomTab = it }
-                BottomTab("AI Search", Icons.Filled.Search, selectedBottomTab) { selectedBottomTab = it }
-                BottomTab("Messages", Icons.Filled.Email, selectedBottomTab) { selectedBottomTab = it }
-                BottomTab("Profile", Icons.Filled.Person, selectedBottomTab) { selectedBottomTab = it }
+                BottomTab("AI Search", Icons.Filled.Search, selectedBottomTab) {
+                    selectedBottomTab = it
+                }
+                BottomTab("Messages", Icons.Filled.Email, selectedBottomTab) {
+                    selectedBottomTab = it
+                }
+                BottomTab("Profile", Icons.Filled.Person, selectedBottomTab) {
+                    selectedBottomTab = it
+                }
             }
         }
-
-
     ) { padding ->
-        if (selectedBottomTab == "Profile") {
 
-            Column(
+        if (selectedBottomTab != "Profile") {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+            )
+            return@Scaffold
+        }
+
+        Column(
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize()
                 .background(PureWhite)
                 .padding(16.dp)
         ) {
-
-            // Header Title
+            //  Header
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Profile", fontWeight = FontWeight.Bold, fontSize = 24.sp, color = RussianViolet)
+                Text(
+                    "Profile",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 24.sp,
+                    color = RussianViolet
+                )
                 Icon(Icons.Filled.Person, contentDescription = "Settings", tint = RussianViolet)
             }
 
             Spacer(Modifier.height(20.dp))
-
-            // Profile Info (Centered)
+            //  Founder Profile Info
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -99,30 +107,34 @@ fun InvestorProfilePosts() {
                         .background(RussianViolet),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("AI", color = PureWhite, fontWeight = FontWeight.Bold, fontSize = 26.sp)
+                    Text("CT", color = PureWhite, fontWeight = FontWeight.Bold, fontSize = 26.sp)
                 }
                 Spacer(Modifier.height(8.dp))
-                Text("Angel Invest", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = RussianViolet)
-                Text("Investor", color = CaputMortuum, fontSize = 14.sp)
+                Text(
+                    "CleanTech",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
+                    color = RussianViolet
+                )
+                Text("Founder", color = CaputMortuum, fontSize = 14.sp)
                 Text("574 Connections", color = Glaucous, fontSize = 14.sp)
             }
 
             Spacer(Modifier.height(22.dp))
 
-            // Tabs Row
+            //  Tabs
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 TabItem("Posts", selectedProfileTab) { selectedProfileTab = "Posts" }
-                TabItem("Supported Projects", selectedProfileTab) { selectedProfileTab = "Supported Projects" }
+                TabItem("Projects", selectedProfileTab) { selectedProfileTab = "Projects" }
             }
 
             Spacer(Modifier.height(6.dp))
             Divider(color = Almond, thickness = 1.dp)
             Spacer(Modifier.height(10.dp))
 
-            // Tab Content
             if (selectedProfileTab == "Posts") {
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(3),
@@ -130,60 +142,16 @@ fun InvestorProfilePosts() {
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    items(samplePosts) { post -> PostCard(post) }
+                    items(founderPosts) { post -> FounderPostCard(post) }
                 }
             } else {
-                InvestorProfileProjects()
-            }
-        }
-        } else {
-            Box(
-                modifier = Modifier
-                    .padding(padding)
-                    .fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-
+                FounderProfileProjects()
             }
         }
     }
 }
 @Composable
-fun TabItem(
-    label: String,
-    selected: String,
-    onClick: () -> Unit
-) {
-    Text(
-        text = label,
-        fontWeight = if (selected == label) FontWeight.Bold else FontWeight.Normal,
-        color = if (selected == label) RussianViolet else Color.Gray,
-        modifier = Modifier.clickable { onClick() }
-    )
-}
-@Composable
-fun BottomTab(label: String, icon: ImageVector, selected: String, onClick: (String) -> Unit) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .clickable { onClick(label) }
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = label,
-            tint = if (selected == label) RussianViolet else Color.Gray,
-            modifier = Modifier.size(22.dp)
-        )
-        Text(
-            text = label,
-            color = if (selected == label) RussianViolet else Color.Gray,
-            fontSize = 11.sp
-        )
-    }
-}
-
-@Composable
-fun PostCard(post: Post) {
+fun FounderPostCard(post: FounderPost){
     Column(
         modifier = Modifier
             .background(Almond, RoundedCornerShape(8.dp))
@@ -202,5 +170,33 @@ fun PostCard(post: Post) {
         Spacer(Modifier.height(4.dp))
         Text(post.title, fontWeight = FontWeight.Bold, color = RussianViolet)
         Text(post.updated, color = Color.Gray, fontSize = 11.sp)
+    }
+}
+@Composable
+fun FounderTab(label: String, selected: String, onClick: () -> Unit){
+    Text(
+        text = label,
+        fontWeight = if (selected == label) FontWeight.Bold else FontWeight.Normal,
+        color = if (selected == label) RussianViolet else Color.Gray,
+        modifier = Modifier.clickable { onClick() }
+    )
+}
+@Composable
+fun FounderBottomTab(label: String, icon: ImageVector, selected: String, onClick: (String) -> Unit) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.clickable { onClick(label) }
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = label,
+            tint = if (selected == label) RussianViolet else Color.Gray,
+            modifier = Modifier.size(22.dp)
+        )
+        Text(
+            text = label,
+            color = if (selected == label) RussianViolet else Color.Gray,
+            fontSize = 11.sp
+        )
     }
 }
