@@ -269,7 +269,7 @@ fun FounderProfileContent(onNavigateToConnections: () -> Unit = {}) {
             )
             Text("Founder", color = CaputMortuum, fontSize = 14.sp)
             Text(
-                text = "574 Connections",
+                text = "7 Connections",
                 color = Glaucous,
                 fontSize = 14.sp,
                 modifier = Modifier.clickable { onNavigateToConnections() }
@@ -358,7 +358,7 @@ fun InvestorProfileContent(onNavigateToConnections: () -> Unit = {}) {
             )
             Text("Investor", color = CaputMortuum, fontSize = 14.sp)
             Text(
-                text = "574 Connections",
+                text = "7 Connections",
                 color = Glaucous,
                 fontSize = 14.sp,
                 modifier = Modifier.clickable { onNavigateToConnections() }
