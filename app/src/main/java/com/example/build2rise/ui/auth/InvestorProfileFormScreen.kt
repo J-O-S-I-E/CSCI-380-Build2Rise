@@ -141,7 +141,7 @@ fun InvestorProfileScreen(
                 // Investment Range
                 AuthDropdownField(
                     label = "Investment Range",
-                    placeholder = "Select Team Size",
+                    placeholder = "Select Investment Range",
                     options = listOf(
                         "$10K - $50K",
                         "$50K - $100K",
