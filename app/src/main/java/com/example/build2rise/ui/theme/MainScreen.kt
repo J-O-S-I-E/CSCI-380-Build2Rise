@@ -1,9 +1,10 @@
-package com.example.build2rise.ui
+package com.example.build2rise.ui.theme
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
@@ -19,7 +20,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.grid.items
 
-
 /**
  * Main container for the app with bottom navigation
  * This handles navigation between all main screens
@@ -27,13 +27,17 @@ import androidx.compose.foundation.lazy.grid.items
 @Composable
 fun MainScreen(userType: String = "founder") {
     var selectedTab by remember { mutableStateOf("Feed") }
+    var showConnectionsScreen by remember { mutableStateOf(false) }
 
     Scaffold(
         bottomBar = {
-            BottomNavigationBar(
-                selectedTab = selectedTab,
-                onTabSelected = { selectedTab = it }
-            )
+            // Only show bottom nav if not viewing connections
+            if (!showConnectionsScreen) {
+                BottomNavigationBar(
+                    selectedTab = selectedTab,
+                    onTabSelected = { selectedTab = it }
+                )
+            }
         },
         containerColor = PureWhite
     ) { paddingValues ->
@@ -42,12 +46,22 @@ fun MainScreen(userType: String = "founder") {
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // Switch between screens based on selected tab
-            when (selectedTab) {
-                "Feed" -> FeedScreen()
-                "AI Search" -> AISearchScreen()
-                "Messages" -> MessagesScreen()
-                "Profile" -> ProfileScreen(userType)
+            // Show connections screen or main navigation
+            if (showConnectionsScreen) {
+                ConnectionsScreenWrapper(
+                    onBack = { showConnectionsScreen = false }
+                )
+            } else {
+                // Switch between screens based on selected tab
+                when (selectedTab) {
+                    "Feed" -> FeedScreen()
+                    "AI Search" -> AISearchScreen()
+                    "Messages" -> MessagesScreen()
+                    "Profile" -> ProfileScreen(
+                        userType = userType,
+                        onNavigateToConnections = { showConnectionsScreen = true }
+                    )
+                }
             }
         }
     }
@@ -148,20 +162,41 @@ fun AISearchScreen() {
     }
 }
 
+/**
+ * Connections Screen Wrapper with back navigation
+ */
 @Composable
-fun MessagesScreen() {
-    Box(
+fun ConnectionsScreenWrapper(onBack: () -> Unit) {
+    Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(PureWhite),
-        contentAlignment = Alignment.Center
+            .background(PureWhite)
     ) {
-        Text(
-            text = "Messages Screen",
-            fontSize = 20.sp,
-            color = RussianViolet,
-            fontWeight = FontWeight.Bold
-        )
+        // Back button header
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = onBack) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = "Back",
+                    tint = RussianViolet
+                )
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = "My Connections",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = RussianViolet
+            )
+        }
+
+        // Connections content
+        Connections()
     }
 }
 
@@ -170,19 +205,23 @@ fun MessagesScreen() {
  * based on user type
  */
 @Composable
-fun ProfileScreen(userType: String) {
+fun ProfileScreen(
+    userType: String,
+    onNavigateToConnections: () -> Unit = {}
+) {
     if (userType == "founder") {
-        FounderProfileContent()
+        FounderProfileContent(onNavigateToConnections)
     } else {
-        InvestorProfileContent()
+        InvestorProfileContent(onNavigateToConnections)
     }
 }
 
 /**
- * Founder Profile Content (without Scaffold - extracted from FounderProfilePosts)
+ * Founder Profile Content
+ * Uses FounderProfilePosts data and components
  */
 @Composable
-fun FounderProfileContent() {
+fun FounderProfileContent(onNavigateToConnections: () -> Unit = {}) {
     var selectedProfileTab by remember { mutableStateOf("Posts") }
 
     Column(
@@ -229,7 +268,12 @@ fun FounderProfileContent() {
                 color = RussianViolet
             )
             Text("Founder", color = CaputMortuum, fontSize = 14.sp)
-            Text("574 Connections", color = Glaucous, fontSize = 14.sp)
+            Text(
+                text = "574 Connections",
+                color = Glaucous,
+                fontSize = 14.sp,
+                modifier = Modifier.clickable { onNavigateToConnections() }
+            )
         }
 
         Spacer(Modifier.height(22.dp))
@@ -255,7 +299,6 @@ fun FounderProfileContent() {
                     columns = androidx.compose.foundation.lazy.grid.GridCells.Fixed(3),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    //modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(bottom = 80.dp)
                 ) {
                     items(founderPosts) { post -> FounderPostCard(post) }
@@ -268,10 +311,11 @@ fun FounderProfileContent() {
 }
 
 /**
- * Investor Profile Content (without Scaffold - extracted from InvestorProfilePosts)
+ * Investor Profile Content
+ * Uses InvestorProfilePosts data and components
  */
 @Composable
-fun InvestorProfileContent() {
+fun InvestorProfileContent(onNavigateToConnections: () -> Unit = {}) {
     var selectedProfileTab by remember { mutableStateOf("Posts") }
 
     Column(
@@ -313,7 +357,12 @@ fun InvestorProfileContent() {
                 color = RussianViolet
             )
             Text("Investor", color = CaputMortuum, fontSize = 14.sp)
-            Text("574 Connections", color = Glaucous, fontSize = 14.sp)
+            Text(
+                text = "574 Connections",
+                color = Glaucous,
+                fontSize = 14.sp,
+                modifier = Modifier.clickable { onNavigateToConnections() }
+            )
         }
 
         Spacer(Modifier.height(22.dp))
@@ -341,11 +390,11 @@ fun InvestorProfileContent() {
                     columns = androidx.compose.foundation.lazy.grid.GridCells.Fixed(3),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    // modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(bottom = 80.dp)
                 ) {
                     items(samplePosts) { post -> PostCard(post) }
-                }
+                    }
+
             } else {
                 InvestorProfileProjects()
             }

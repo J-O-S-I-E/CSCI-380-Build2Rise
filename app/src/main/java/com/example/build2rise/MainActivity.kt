@@ -70,38 +70,59 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.build2rise.ui.MainScreen
+import com.example.build2rise.ui.theme.MainScreen
+import com.example.build2rise.ui.auth.AuthNavigator
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             MaterialTheme {
-                // Toggle user type for testing
-                var userType by remember { mutableStateOf("founder") }
-
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                ) {
-                    // Testing toggle buttons (remove before demo)
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Button(onClick = { userType = "investor" }) {
-                            Text("Investor Mode")
-                        }
-                        Button(onClick = { userType = "founder" }) {
-                            Text("Founder Mode")
-                        }
-                    }
-
-                    // Main Screen with Bottom Navigation
-                    MainScreen(userType = userType)
-                }
+//                // Toggle user type for testing
+//                var userType by remember { mutableStateOf("founder") }
+//
+//                Column(
+//                    modifier = Modifier.fillMaxSize(),
+//                ) {
+//                    // Testing toggle buttons (remove before demo)
+//                    Row(
+//                        modifier = Modifier
+//                            .fillMaxWidth()
+//                            .padding(16.dp),
+//                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+//                        verticalAlignment = Alignment.CenterVertically
+//                    ) {
+//                        Button(onClick = { userType = "investor" }) {
+//                            Text("Investor Mode")
+//                        }
+//                        Button(onClick = { userType = "founder" }) {
+//                            Text("Founder Mode")
+//                        }
+//                    }
+//
+//                    // Main Screen with Bottom Navigation
+//                    MainScreen(userType = userType)
+//                }
+            Build2RiseApp()
             }
         }
+    }
+}
+@Composable
+fun Build2RiseApp() {
+    var isAuthenticated by remember { mutableStateOf(false) }
+    var userType by remember { mutableStateOf("founder") }
+
+    if (isAuthenticated) {
+        // main app after authentication
+        MainScreen(userType = userType)
+        } else {
+        // authentication flow
+        AuthNavigator(
+            onAuthComplete = { selectedUserType ->
+                userType = selectedUserType
+                isAuthenticated = true
+            }
+        )
     }
 }

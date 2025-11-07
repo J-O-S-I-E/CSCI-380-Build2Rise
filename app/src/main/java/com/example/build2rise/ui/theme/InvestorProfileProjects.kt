@@ -1,4 +1,4 @@
-package com.example.build2rise.ui
+package com.example.build2rise.ui.theme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Comment
 import androidx.compose.foundation.background
