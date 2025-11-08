@@ -145,22 +145,6 @@ fun BottomNavItem(
 /**
  * Placeholder screens - Replace with actual screen implementations
  */
-@Composable
-fun AISearchScreen() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(PureWhite),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = "AI Search Screen",
-            fontSize = 20.sp,
-            color = RussianViolet,
-            fontWeight = FontWeight.Bold
-        )
-    }
-}
 
 /**
  * Connections Screen Wrapper with back navigation
