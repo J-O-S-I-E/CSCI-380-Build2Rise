@@ -8,7 +8,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -19,24 +18,27 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
-data class MessageItem(
-    val sender: String,
-    val message: String,
-    val time: String,
-    val unreadCount: Int = 0
-)
-
-val sampleMessages = listOf(
-    MessageItem("MedHealth AI", "Would love to discuss pot...", "2m", unreadCount = 2),
-    MessageItem("Marc Martinez", "Thanks for connecting! I’d lo..", "1h"),
-    MessageItem("TechCorp", "Congratulations on your rec...", "3h"),
-    MessageItem("Angel Investor", "I reviewed your proposal...", "1d"),
-    MessageItem("Rise Fund", "Your pitch deck looks inte...", "2d")
-)
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.build2rise.data.model.ConversationResponse
+import com.example.build2rise.ui.viewmodel.MessageViewModel
+import com.example.build2rise.ui.viewmodel.ConversationsState
+import java.time.Instant
+import java.time.ZoneId
+import java.time.temporal.ChronoUnit
 
 @Composable
-fun MessagesScreen() {
+fun MessagesScreen(
+    viewModel: MessageViewModel = viewModel(),
+    onConversationClick: (String, String) -> Unit = { _, _ -> }
+) {
+    var searchQuery by remember { mutableStateOf("") }
+    val conversationsState by viewModel.conversationsState.collectAsState()
+
+    // Load conversations on screen open
+    LaunchedEffect(Unit) {
+        viewModel.getConversations()
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -55,90 +57,161 @@ fun MessagesScreen() {
                 fontSize = 26.sp,
                 color = RussianViolet
             )
-            Icon(
-                Icons.Filled.Add,
-                contentDescription = "New Message",
-                tint = RussianViolet
-            )
         }
 
         Spacer(Modifier.height(12.dp))
-        Divider(color = Almond, thickness = 1.dp)
+        HorizontalDivider(color = Almond, thickness = 1.dp)
         Spacer(Modifier.height(12.dp))
 
         // Search Bar
-        SearchBar()
+        OutlinedTextField(
+            value = searchQuery,
+            onValueChange = { searchQuery = it },
+            modifier = Modifier.fillMaxWidth(),
+            placeholder = { Text("Search conversations", color = Color.Gray, fontSize = 14.sp) },
+            trailingIcon = {
+                Icon(Icons.Filled.Search, contentDescription = "Search", tint = Color.Gray)
+            },
+            singleLine = true,
+            shape = RoundedCornerShape(24.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedContainerColor = Almond,
+                unfocusedContainerColor = Almond,
+                focusedBorderColor = Color.Transparent,
+                unfocusedBorderColor = Color.Transparent
+            )
+        )
 
         Spacer(Modifier.height(16.dp))
 
-        // Messages List
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            items(sampleMessages) { message ->
-                MessageCard(message)
+        // Conversations List
+        when (val state = conversationsState) {
+            is ConversationsState.Loading -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = RussianViolet)
+                }
             }
+            is ConversationsState.Success -> {
+                val filteredConversations = if (searchQuery.isBlank()) {
+                    state.conversations
+                } else {
+                    state.conversations.filter { conversation ->
+                        val name = "${conversation.firstName} ${conversation.lastName}"
+                        name.contains(searchQuery, ignoreCase = true)
+                    }
+                }
+
+                if (filteredConversations.isEmpty()) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            if (searchQuery.isBlank()) "No messages yet" else "No results found",
+                            color = Color.Gray,
+                            fontSize = 16.sp
+                        )
+                    }
+                } else {
+                    LazyColumn(
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        contentPadding = PaddingValues(bottom = 80.dp)
+                    ) {
+                        items(filteredConversations) { conversation ->
+                            ConversationCard(
+                                conversation = conversation,
+                                onClick = {
+                                    val name = "${conversation.firstName} ${conversation.lastName}"
+                                    onConversationClick(conversation.userId, name)
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+            is ConversationsState.Error -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(state.message, color = Color.Red)
+                        Button(
+                            onClick = { viewModel.getConversations() },
+                            colors = ButtonDefaults.buttonColors(containerColor = RussianViolet)
+                        ) {
+                            Text("Retry")
+                        }
+                    }
+                }
+            }
+            else -> {}
         }
     }
 }
 
 @Composable
-fun SearchBar() {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Almond, RoundedCornerShape(50))
-            .padding(horizontal = 16.dp, vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = "Search conversations",
-            color = Color.Gray,
-            fontSize = 14.sp,
-            modifier = Modifier.weight(1f)
-        )
-        Icon(Icons.Filled.Search, contentDescription = "Search", tint = Color.Gray)
-    }
-}
-
-@Composable
-fun MessageCard(message: MessageItem) {
+fun ConversationCard(
+    conversation: ConversationResponse,
+    onClick: () -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .background(PureWhite, RoundedCornerShape(12.dp))
-            .clickable { }
+            .clickable(onClick = onClick)
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Circular initials (like "CT" in Founder Profile)
+        // Avatar
         Box(
             modifier = Modifier
-                .size(46.dp)
+                .size(50.dp)
                 .clip(CircleShape)
                 .background(RussianViolet),
             contentAlignment = Alignment.Center
         ) {
+            val initials = "${conversation.firstName?.firstOrNull() ?: ""}${conversation.lastName?.firstOrNull() ?: ""}"
             Text(
-                text = message.sender.split(" ")
-                    .take(2)
-                    .joinToString("") { it.first().uppercase() },
+                text = initials.ifEmpty { "U" },
                 color = PureWhite,
                 fontWeight = FontWeight.Bold,
-                fontSize = 14.sp
+                fontSize = 16.sp
             )
         }
 
         Spacer(Modifier.width(12.dp))
 
         Column(modifier = Modifier.weight(1f)) {
-            Text(message.sender, fontWeight = FontWeight.Bold, color = RussianViolet)
-            Text(message.message, color = Color.Gray, fontSize = 13.sp, maxLines = 1)
+            Text(
+                "${conversation.firstName} ${conversation.lastName}",
+                fontWeight = FontWeight.Bold,
+                color = RussianViolet,
+                fontSize = 16.sp
+            )
+            Text(
+                conversation.lastMessage ?: "No messages yet",
+                color = Color.Gray,
+                fontSize = 14.sp,
+                maxLines = 1
+            )
         }
 
         Spacer(Modifier.width(8.dp))
 
         Column(horizontalAlignment = Alignment.End) {
-            Text(message.time, color = Color.Gray, fontSize = 12.sp)
-            if (message.unreadCount > 0) {
+            Text(
+                formatMessageTime(conversation.lastMessageTime),
+                color = Color.Gray,
+                fontSize = 12.sp
+            )
+            if (conversation.unreadCount > 0) {
                 Box(
                     modifier = Modifier
                         .padding(top = 4.dp)
@@ -148,7 +221,7 @@ fun MessageCard(message: MessageItem) {
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = message.unreadCount.toString(),
+                        text = conversation.unreadCount.toString(),
                         color = PureWhite,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold
@@ -156,5 +229,28 @@ fun MessageCard(message: MessageItem) {
                 }
             }
         }
+    }
+}
+
+fun formatMessageTime(timestamp: String?): String {
+    if (timestamp == null) return ""
+    return try {
+        val instant = Instant.parse(timestamp)
+        val now = Instant.now()
+        val minutes = ChronoUnit.MINUTES.between(instant, now)
+
+        when {
+            minutes < 1 -> "now"
+            minutes < 60 -> "${minutes}m"
+            minutes < 1440 -> "${minutes / 60}h"
+            minutes < 10080 -> "${minutes / 1440}d"
+            else -> {
+                val formatter = java.time.format.DateTimeFormatter.ofPattern("MMM dd")
+                    .withZone(ZoneId.systemDefault())
+                formatter.format(instant)
+            }
+        }
+    } catch (e: Exception) {
+        ""
     }
 }

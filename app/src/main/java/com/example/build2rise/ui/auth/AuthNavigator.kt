@@ -1,18 +1,62 @@
 package com.example.build2rise.ui.auth
 
 import androidx.compose.runtime.*
-import com.example.build2rise.ui.theme.MainScreen
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.build2rise.ui.viewmodel.AuthViewModel
+import com.example.build2rise.ui.viewmodel.ProfileViewModel
+import com.example.build2rise.ui.viewmodel.AuthState
+import com.example.build2rise.ui.viewmodel.ProfileCreateState
+
 
 /**
- * Central authentication navigation manager
- * Handles all auth screen transitions
+ * Central authentication navigation manager with backend integration
  */
 @Composable
 fun AuthNavigator(
-    onAuthComplete: (userType: String) -> Unit
+    onAuthComplete: (userType: String) -> Unit,
+    authViewModel: AuthViewModel = viewModel(),
+    profileViewModel: ProfileViewModel = viewModel()
 ) {
     var currentScreen by remember { mutableStateOf<AuthScreen>(AuthScreen.Welcome) }
     var selectedUserType by remember { mutableStateOf<String?>(null) }
+
+    // Profile form data
+    var profileData by remember { mutableStateOf<ProfileFormData?>(null) }
+
+    // Observe auth state
+    val authState by authViewModel.authState.collectAsState()
+    val profileCreateState by profileViewModel.profileCreateState.collectAsState()
+
+    // Handle auth state changes
+    LaunchedEffect(authState) {
+        when (val state = authState) {
+            is AuthState.Success -> {
+                // Auth successful, navigate to success screen
+                currentScreen = AuthScreen.Success
+                selectedUserType = state.userType
+                authViewModel.resetState()
+            }
+            is AuthState.Error -> {
+                // Error will be shown in the UI screens
+            }
+            else -> {}
+        }
+    }
+
+    // ✅ Handle profile creation state
+    LaunchedEffect(profileCreateState) {
+        when (profileCreateState) {
+            is ProfileCreateState.Success -> {
+                // Profile created successfully, navigate to main app
+                profileViewModel.resetCreateState()
+                onAuthComplete(selectedUserType ?: "founder")
+            }
+            is ProfileCreateState.Error -> {
+                // Error shown in UI, stay on success screen
+            }
+            else -> {}
+        }
+    }
 
     when (currentScreen) {
         AuthScreen.Welcome -> {
@@ -36,21 +80,29 @@ fun AuthNavigator(
         }
 
         AuthScreen.FounderProfile -> {
-            FounderProfileScreen(
+            FounderProfileFormScreen(
                 onBack = { currentScreen = AuthScreen.CreateAccount },
-                onContinue = { currentScreen = AuthScreen.SecureAccount }
+                onContinue = { founderData ->
+                    profileData = ProfileFormData(founderData = founderData)
+                    currentScreen = AuthScreen.SecureAccount
+                }
             )
         }
 
         AuthScreen.InvestorProfile -> {
-            InvestorProfileScreen(
+            InvestorProfileFormScreen(
                 onBack = { currentScreen = AuthScreen.CreateAccount },
-                onContinue = { currentScreen = AuthScreen.SecureAccount }
+                onContinue = { investorData ->
+                    profileData = ProfileFormData(investorData = investorData)
+                    currentScreen = AuthScreen.SecureAccount
+                }
             )
         }
 
         AuthScreen.SecureAccount -> {
             SecureAccountScreen(
+                viewModel = authViewModel,
+                userType = selectedUserType ?: "founder",
                 onBack = {
                     currentScreen = if (selectedUserType == "founder") {
                         AuthScreen.FounderProfile
@@ -58,41 +110,80 @@ fun AuthNavigator(
                         AuthScreen.InvestorProfile
                     }
                 },
-                onCreateAccount = { currentScreen = AuthScreen.Success },
                 onLoginClick = { currentScreen = AuthScreen.Login }
             )
         }
 
         AuthScreen.Success -> {
             SuccessScreen(
+                isLoading = profileCreateState is ProfileCreateState.Loading,
                 onGetStarted = {
-                    // Navigate to main app with selected user type
-                    onAuthComplete(selectedUserType ?: "founder")
-                },
-                onCompleteProfile = {
-                    // For now, also navigate to main app
-                    // Later, you can add profile completion screens
-                    onAuthComplete(selectedUserType ?: "founder")
+                    // ✅ Create profile with saved data, then navigate
+                    profileData?.let { data ->
+                        if (selectedUserType == "founder") {
+                            profileViewModel.createFounderProfile(
+                                startupName = data.founderData?.startupName ?: "",
+                                industry = data.founderData?.industry,
+                                location = data.founderData?.location,
+                                teamSize = data.founderData?.teamSize,
+                                fundingStage = data.founderData?.fundingStage,
+                                description = data.founderData?.description
+                            )
+                        } else {
+                            profileViewModel.createInvestorProfile(
+                                nameFirm = data.investorData?.nameFirm ?: "",
+                                industry = data.investorData?.industry,
+                                geographicPreference = data.investorData?.geographicPreference,
+                                investmentRange = data.investorData?.investmentRange,
+                                fundingStagePreference = data.investorData?.fundingStagePreference
+                            )
+                        }
+                    } ?: run {
+                        // ❌ No profile data saved, navigate anyway (shouldn't happen)
+                        onAuthComplete(selectedUserType ?: "founder")
+                    }
                 }
+                // ❌ REMOVED: onCompleteProfile parameter
             )
         }
 
         AuthScreen.Login -> {
             LoginScreen(
+                viewModel = authViewModel,
                 onBack = { currentScreen = AuthScreen.Welcome },
-                onLogin = {
-                    // In Sprint 2, validate credentials here
-                    // For now, navigate to main app
-                    onAuthComplete(selectedUserType ?: "founder")
-                },
                 onSignUp = { currentScreen = AuthScreen.CreateAccount },
                 onForgotPassword = {
-                    // TODO: Implement forgot password flow in Sprint 2
+                    // TODO: Implement forgot password
                 }
             )
         }
     }
 }
+
+/**
+ * Data class to hold profile form data between screens
+ */
+data class ProfileFormData(
+    val founderData: FounderFormData? = null,
+    val investorData: InvestorFormData? = null
+)
+
+data class FounderFormData(
+    val startupName: String,
+    val industry: String?,
+    val location: String?,
+    val teamSize: String?,
+    val fundingStage: String?,
+    val description: String?
+)
+
+data class InvestorFormData(
+    val nameFirm: String,
+    val industry: String?,
+    val geographicPreference: String?,
+    val investmentRange: String?,
+    val fundingStagePreference: String?
+)
 
 /**
  * Sealed class representing all authentication screens

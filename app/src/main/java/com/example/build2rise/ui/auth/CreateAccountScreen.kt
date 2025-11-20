@@ -5,19 +5,15 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.build2rise.ui.theme.Almond
-import com.example.build2rise.ui.theme.Glaucous
 import com.example.build2rise.ui.theme.PureWhite
 import com.example.build2rise.ui.theme.RussianViolet
 
@@ -112,19 +108,6 @@ fun CreateAccountScreen(
             )
         }
     }
-}
-
-@Composable
-fun ProgressDot(isActive: Boolean) {
-    Box(
-        modifier = Modifier
-            .width(if (isActive) 40.dp else 12.dp)
-            .height(12.dp)
-            .background(
-                color = if (isActive) Glaucous else Color.LightGray,
-                shape = RoundedCornerShape(6.dp)
-            )
-    )
 }
 
 @Composable

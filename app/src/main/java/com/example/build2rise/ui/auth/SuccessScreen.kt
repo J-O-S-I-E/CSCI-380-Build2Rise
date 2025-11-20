@@ -12,14 +12,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.build2rise.ui.theme.Almond
-import com.example.build2rise.ui.theme.Glaucous
 import com.example.build2rise.ui.theme.PureWhite
 import com.example.build2rise.ui.theme.RussianViolet
 
 @Composable
 fun SuccessScreen(
-    onGetStarted: () -> Unit,
-    onCompleteProfile: () -> Unit
+    onGetStarted: () -> Unit,  // This handles profile creation + navigation
+    isLoading: Boolean = false  // show loading state
 ) {
     Column(
         modifier = Modifier
@@ -92,7 +91,7 @@ fun SuccessScreen(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Start exploring the platform. You can add more details to your profile anytime to increase visibility.",
+                        text = "Start exploring the platform and connecting with founders and investors.",
                         fontSize = 14.sp,
                         color = RussianViolet.copy(alpha = 0.8f),
                         lineHeight = 20.sp
@@ -104,7 +103,7 @@ fun SuccessScreen(
 
             // Quick Actions
             Text(
-                text = "Quick Actions:",
+                text = "What you can do:",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
                 color = RussianViolet,
@@ -117,42 +116,34 @@ fun SuccessScreen(
                 QuickAction("Browse startup pitches")
                 QuickAction("Discover investors")
                 QuickAction("Post your first update")
-                QuickAction("Complete profile")
+                QuickAction("Build connections")
             }
 
             Spacer(modifier = Modifier.weight(1f))
 
-            // Buttons
-            Column(
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+            // ✅ ONE Button - Build2Rise
+            Button(
+                onClick = onGetStarted,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                shape = RoundedCornerShape(28.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = RussianViolet
+                ),
+                enabled = !isLoading  // Disable while loading
             ) {
-                Button(
-                    onClick = onGetStarted,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
-                    shape = RoundedCornerShape(28.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = RussianViolet
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        color = PureWhite,
+                        modifier = Modifier.size(24.dp)
                     )
-                ) {
+                } else {
                     Text(
-                        text = "Build2Rise",
+                        text = "Build2Rise →",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = PureWhite
-                    )
-                }
-
-                TextButton(
-                    onClick = onCompleteProfile,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = "Complete profile",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = Glaucous
                     )
                 }
             }
