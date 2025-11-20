@@ -6,7 +6,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -19,15 +19,15 @@ import com.example.build2rise.ui.theme.PureWhite
 import com.example.build2rise.ui.theme.RussianViolet
 
 @Composable
-fun InvestorProfileScreen(
+fun InvestorProfileFormScreen(
     onBack: () -> Unit,
-    onContinue: () -> Unit
+    onContinue: (InvestorFormData) -> Unit
 ) {
     var nameFirm by remember { mutableStateOf("") }
     var industry by remember { mutableStateOf("") }
     var geographicPreference by remember { mutableStateOf("") }
     var investmentRange by remember { mutableStateOf("") }
-    var fundingStage by remember { mutableStateOf("") }
+    var fundingStagePreference by remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier
@@ -44,7 +44,7 @@ fun InvestorProfileScreen(
         ) {
             IconButton(onClick = onBack) {
                 Icon(
-                    imageVector = Icons.Default.ArrowBack,
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Back",
                     tint = RussianViolet
                 )
@@ -61,7 +61,6 @@ fun InvestorProfileScreen(
                 ProgressDot(isActive = false)
             }
 
-            // Empty space for symmetry
             Spacer(modifier = Modifier.width(48.dp))
         }
 
@@ -102,12 +101,14 @@ fun InvestorProfileScreen(
                     label = "Name/Firm",
                     value = nameFirm,
                     onValueChange = { nameFirm = it },
-                    placeholder = "Startup/Company Name"
+                    placeholder = "Your Name or Firm Name"
                 )
 
                 // Industry
                 AuthDropdownField(
                     label = "Industry",
+                    selectedValue = industry,
+                    onValueChange = { industry = it },
                     placeholder = "Select Industry",
                     options = listOf(
                         "All Industries",
@@ -125,6 +126,8 @@ fun InvestorProfileScreen(
                 // Geographic Preference
                 AuthDropdownField(
                     label = "Geographic Preference",
+                    selectedValue = geographicPreference,
+                    onValueChange = { geographicPreference = it },
                     placeholder = "Select Location",
                     options = listOf(
                         "Global",
@@ -141,6 +144,8 @@ fun InvestorProfileScreen(
                 // Investment Range
                 AuthDropdownField(
                     label = "Investment Range",
+                    selectedValue = investmentRange,
+                    onValueChange = { investmentRange = it },
                     placeholder = "Select Investment Range",
                     options = listOf(
                         "$10K - $50K",
@@ -153,9 +158,11 @@ fun InvestorProfileScreen(
                     )
                 )
 
-                // Funding Stage
+                // Funding Stage Preference
                 AuthDropdownField(
                     label = "Funding Stage",
+                    selectedValue = fundingStagePreference,
+                    onValueChange = { fundingStagePreference = it },
                     placeholder = "Select Funding Stage",
                     options = listOf(
                         "All Stages",
@@ -173,7 +180,17 @@ fun InvestorProfileScreen(
 
             // Continue Button
             Button(
-                onClick = onContinue,
+                onClick = {
+                    onContinue(
+                        InvestorFormData(
+                            nameFirm = nameFirm,
+                            industry = industry.takeIf { it.isNotBlank() },
+                            geographicPreference = geographicPreference.takeIf { it.isNotBlank() },
+                            investmentRange = investmentRange.takeIf { it.isNotBlank() },
+                            fundingStagePreference = fundingStagePreference.takeIf { it.isNotBlank() }
+                        )
+                    )
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),

@@ -1,15 +1,15 @@
 package com.example.build2rise.ui.theme
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -17,229 +17,453 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.build2rise.data.model.UserProfileResponse
+import com.example.build2rise.ui.viewmodel.SearchViewModel
+import com.example.build2rise.ui.viewmodel.SearchState
+import com.example.build2rise.ui.viewmodel.ConnectionViewModel
+import com.example.build2rise.ui.viewmodel.ConnectionActionState
+import com.example.build2rise.ui.viewmodel.ProfileViewModel
+import com.example.build2rise.ui.viewmodel.ProfileState
+import com.example.build2rise.ui.viewmodel.ProjectViewModel
+import com.example.build2rise.ui.viewmodel.ProjectActionState
 
-data class AIProfile(
-    val initials: String,
-    val name: String,
-    val role: String,
-    val description: String,
-    val location: String,
-    val stage: String,
-    val tag: String
-)
-
-val sampleInvestors = listOf(
-    AIProfile(
-        initials = "TC",
-        name = "MedHealth AI",
-        role = "Founder, HealthTech",
-        description = "Building AI-powered diagnostic tools for rural healthcare. 50K+ patients served, seeking strategic partners and growth capital.",
-        location = "Austin",
-        stage = "Series A",
-        tag = "HealthTech"
-    ),
-    AIProfile(
-        initials = "MM",
-        name = "Marc Martinez",
-        role = "Angel Investor, Ex-Google",
-        description = "Focus on early-stage B2B SaaS. 15+ investments including 3 exits. Looking for technical founders solving enterprise problems.",
-        location = "San Francisco",
-        stage = "Series A",
-        tag = "B2B SaaS"
-    )
-)
-
-val sampleFounders = listOf(
-    AIProfile(
-        initials = "AC",
-        name = "Alicia Chen",
-        role = "Founder, FinTech",
-        description = "Developing mobile-first finance management apps for Gen Z. Seeking seed funding and product mentors.",
-        location = "New York",
-        stage = "Seed",
-        tag = "FinTech"
-    ),
-    AIProfile(
-        initials = "RB",
-        name = "Ravi Bhatt",
-        role = "Co-founder, Clean Energy",
-        description = "Working on affordable solar microgrids for rural communities. Looking for impact investors and collaborators.",
-        location = "Denver",
-        stage = "Pre-Series A",
-        tag = "CleanTech"
-    )
-)
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AISearchScreen() {
-    var selectedTab by remember { mutableStateOf("Investors") }
+fun AISearchScreen(
+    searchViewModel: SearchViewModel = viewModel(),
+    connectionViewModel: ConnectionViewModel = viewModel(),
+    profileViewModel: ProfileViewModel = viewModel(),
+    projectViewModel: ProjectViewModel = viewModel()
+) {
+    var selectedUserType by remember { mutableStateOf<String?>(null) }
     var searchQuery by remember { mutableStateOf("") }
+    var currentUserType by remember { mutableStateOf<String?>(null) }
+    val keyboardController = LocalSoftwareKeyboardController.current
 
-    val profiles = if (selectedTab == "Investors") sampleInvestors else sampleFounders
+    val searchState by searchViewModel.searchState.collectAsState()
+    val connectionActionState by connectionViewModel.connectionActionState.collectAsState()
+    val profileState by profileViewModel.profileState.collectAsState()
+    val projectActionState by projectViewModel.projectActionState.collectAsState()
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(PureWhite)
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-    ) {
-        // Header Row
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+    // Get current user type
+    LaunchedEffect(Unit) {
+        profileViewModel.getCurrentUserProfile()
+    }
+
+    LaunchedEffect(profileState) {
+        if (profileState is ProfileState.Success) {
+            currentUserType = (profileState as ProfileState.Success).profile.userType
+        }
+    }
+
+    // Load all users on screen open
+    LaunchedEffect(Unit) {
+        searchViewModel.searchUsers()
+    }
+
+    // Show snackbar for connection actions
+    val snackbarHostState = remember { SnackbarHostState() }
+    LaunchedEffect(connectionActionState) {
+        when (val state = connectionActionState) {
+            is ConnectionActionState.Success -> {
+                snackbarHostState.showSnackbar(state.message)
+                connectionViewModel.resetActionState()
+                searchViewModel.searchUsers(userType = selectedUserType)
+            }
+            is ConnectionActionState.Error -> {
+                snackbarHostState.showSnackbar(state.message)
+                connectionViewModel.resetActionState()
+            }
+            else -> {}
+        }
+    }
+
+    // Show snackbar for project actions
+    LaunchedEffect(projectActionState) {
+        when (val state = projectActionState) {
+            is ProjectActionState.Success -> {
+                snackbarHostState.showSnackbar(state.message)
+                projectViewModel.resetActionState()
+            }
+            is ProjectActionState.Error -> {
+                snackbarHostState.showSnackbar(state.message)
+                projectViewModel.resetActionState()
+            }
+            else -> {}
+        }
+    }
+
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(PureWhite)
+                .padding(paddingValues)
+                .padding(16.dp)
         ) {
+            // Header
             Text(
-                text = "Build2Rise",
+                "Discover",
+                fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
-                fontSize = 26.sp,
                 color = RussianViolet
             )
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Filled.Add, contentDescription = "Add", tint = RussianViolet)
-                Spacer(Modifier.width(8.dp))
-                Icon(Icons.Filled.MoreVert, contentDescription = "Menu", tint = RussianViolet)
-            }
-        }
 
-        Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(16.dp))
 
-        // Tabs
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            TabItem("Investors", selectedTab == "Investors") { selectedTab = "Investors" }
-            TabItem("Founders", selectedTab == "Founders") { selectedTab = "Founders" }
-        }
-
-        Spacer(Modifier.height(10.dp))
-
-        // Search Bar
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Almond, RoundedCornerShape(50))
-                .padding(horizontal = 16.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "Search",
-                color = Color.Gray,
-                fontSize = 14.sp,
-                modifier = Modifier.weight(1f)
+            // Search Bar
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = { searchQuery = it },
+                modifier = Modifier.fillMaxWidth(),
+                placeholder = { Text("Search by name, startup, or industry...") },
+                leadingIcon = {
+                    Icon(
+                        Icons.Default.Search,
+                        contentDescription = "Search",
+                        tint = RussianViolet
+                    )
+                },
+                trailingIcon = {
+                    if (searchQuery.isNotEmpty()) {
+                        IconButton(onClick = { searchQuery = "" }) {
+                            Icon(
+                                Icons.Default.Clear,
+                                contentDescription = "Clear",
+                                tint = RussianViolet
+                            )
+                        }
+                    }
+                },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                keyboardActions = KeyboardActions(
+                    onSearch = { keyboardController?.hide() }
+                ),
+                shape = RoundedCornerShape(24.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedContainerColor = Almond,
+                    unfocusedContainerColor = Almond,
+                    focusedBorderColor = Glaucous,
+                    unfocusedBorderColor = Color.LightGray
+                )
             )
-            Icon(Icons.Filled.Search, contentDescription = "Search", tint = Color.Gray)
-        }
 
-        Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(16.dp))
 
-        Text(
-            text = "${profiles.size} results based on your search",
-            color = Color.Gray,
-            fontSize = 13.sp
-        )
-
-        Spacer(Modifier.height(12.dp))
-
-        // Results List
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            items(profiles) { profile ->
-                ProfileCard(profile)
-            }
-        }
-    }
-}
-
-
-@Composable
-fun TabItem(title: String, isSelected: Boolean, onClick: () -> Unit) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .clickable(onClick = onClick)
-            .padding(vertical = 6.dp)
-    ) {
-        Text(
-            text = title,
-            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-            color = if (isSelected) RussianViolet else Color.Gray,
-            fontSize = 15.sp
-        )
-        if (isSelected) {
-            Spacer(Modifier.height(4.dp))
-            Box(
-                Modifier
-                    .width(50.dp)
-                    .height(2.dp)
-                    .background(RussianViolet)
-            )
-        }
-    }
-}
-
-@Composable
-fun ProfileCard(profile: AIProfile) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Color(0xFFFDFDFD), RoundedCornerShape(16.dp))
-            .padding(14.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Initials Circle
-            Box(
-                modifier = Modifier
-                    .size(42.dp)
-                    .clip(CircleShape)
-                    .background(RussianViolet),
-                contentAlignment = Alignment.Center
+            // User Type Filter Chips
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Text(
-                    text = profile.initials,
-                    color = PureWhite,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 13.sp
+                FilterChip(
+                    selected = selectedUserType == null,
+                    onClick = {
+                        selectedUserType = null
+                        searchViewModel.searchUsers(userType = null)
+                    },
+                    label = { Text("All") },
+                    colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = Glaucous.copy(alpha = 0.2f),
+                        selectedLabelColor = RussianViolet
+                    )
+                )
+                FilterChip(
+                    selected = selectedUserType == "founder",
+                    onClick = {
+                        selectedUserType = "founder"
+                        searchViewModel.searchUsers(userType = "founder")
+                    },
+                    label = { Text("Founders") },
+                    colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = Glaucous.copy(alpha = 0.2f),
+                        selectedLabelColor = RussianViolet
+                    )
+                )
+                FilterChip(
+                    selected = selectedUserType == "investor",
+                    onClick = {
+                        selectedUserType = "investor"
+                        searchViewModel.searchUsers(userType = "investor")
+                    },
+                    label = { Text("Investors") },
+                    colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = Glaucous.copy(alpha = 0.2f),
+                        selectedLabelColor = RussianViolet
+                    )
                 )
             }
 
-            Spacer(Modifier.width(10.dp))
+            Spacer(Modifier.height(16.dp))
 
-            Column(modifier = Modifier.weight(1f)) {
-                Text(profile.name, fontWeight = FontWeight.Bold, color = RussianViolet)
-                Text(profile.role, fontSize = 13.sp, color = Color.Gray)
-            }
+            // Search Results
+            when (val state = searchState) {
+                is SearchState.Loading -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(color = RussianViolet)
+                    }
+                }
+                is SearchState.Success -> {
+                    // Filter results based on search query
+                    val filteredUsers = if (searchQuery.isBlank()) {
+                        state.results.users
+                    } else {
+                        state.results.users.filter { user ->
+                            val query = searchQuery.lowercase()
 
-            // Connect Button
-            Button(
-                onClick = {},
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD7E3FF)),
-                shape = RoundedCornerShape(50),
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp)
-            ) {
-                Text("Connect", color = Color(0xFF2D3E7D), fontSize = 13.sp)
+                            // Search in name
+                            val fullName = "${user.firstName} ${user.lastName}".lowercase()
+                            if (fullName.contains(query)) return@filter true
+
+                            // Search in startup/firm name
+                            val companyName = when (user.userType) {
+                                "founder" -> user.profileData?.startupName?.lowercase()
+                                "investor" -> user.profileData?.nameFirm?.lowercase()
+                                else -> null
+                            }
+                            if (companyName?.contains(query) == true) return@filter true
+
+                            // Search in industry
+                            if (user.profileData?.industry?.lowercase()?.contains(query) == true) {
+                                return@filter true
+                            }
+
+                            // Search in description (founders only)
+                            if (user.profileData?.description?.lowercase()?.contains(query) == true) {
+                                return@filter true
+                            }
+
+                            false
+                        }
+                    }
+
+                    if (filteredUsers.isEmpty()) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Text(
+                                    if (searchQuery.isBlank()) "No users found" else "No results for \"$searchQuery\"",
+                                    color = Color.Gray,
+                                    fontSize = 16.sp
+                                )
+                                if (searchQuery.isNotBlank()) {
+                                    TextButton(onClick = { searchQuery = "" }) {
+                                        Text("Clear search", color = RussianViolet)
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        // Results count
+                        Text(
+                            text = "${filteredUsers.size} ${if (filteredUsers.size == 1) "user" else "users"} found",
+                            color = Color.Gray,
+                            fontSize = 14.sp,
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
+
+                        LazyColumn(
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                            contentPadding = PaddingValues(bottom = 80.dp)
+                        ) {
+                            items(filteredUsers) { user ->
+                                UserSearchCard(
+                                    user = user,
+                                    currentUserType = currentUserType,
+                                    onConnect = {
+                                        connectionViewModel.requestConnection(user.userId)
+                                    },
+                                    onSupportProject = {
+                                        projectViewModel.supportProject(user.userId)
+                                    },
+                                    searchQuery = searchQuery
+                                )
+                            }
+                        }
+                    }
+                }
+                is SearchState.Error -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text(state.message, color = Color.Red)
+                            Button(
+                                onClick = { searchViewModel.searchUsers() },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = RussianViolet
+                                )
+                            ) {
+                                Text("Retry")
+                            }
+                        }
+                    }
+                }
+                else -> {}
             }
         }
+    }
+}
 
-        Spacer(Modifier.height(8.dp))
-
-        Text(profile.description, fontSize = 13.sp, color = Color.Gray)
-
-        Spacer(Modifier.height(10.dp))
-
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(14.dp),
-            verticalAlignment = Alignment.CenterVertically
+@Composable
+fun UserSearchCard(
+    user: UserProfileResponse,
+    currentUserType: String?,
+    onConnect: () -> Unit,
+    onSupportProject: () -> Unit,
+    searchQuery: String = ""
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Almond),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
         ) {
-            Text("📍 ${profile.location}", fontSize = 12.sp, color = Color.Gray)
-            Text("💰 ${profile.stage}", fontSize = 12.sp, color = Color.Gray)
-            Text("🏷️ ${profile.tag}", fontSize = 12.sp, color = Color.Gray)
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Avatar
+                Box(
+                    modifier = Modifier
+                        .size(56.dp)
+                        .clip(CircleShape)
+                        .background(RussianViolet),
+                    contentAlignment = Alignment.Center
+                ) {
+                    val initials = "${user.firstName?.firstOrNull() ?: ""}${user.lastName?.firstOrNull() ?: ""}"
+                    Text(
+                        text = initials.ifEmpty { "U" },
+                        color = PureWhite,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp
+                    )
+                }
+
+                Spacer(Modifier.width(16.dp))
+
+                // User Info
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "${user.firstName ?: ""} ${user.lastName ?: ""}".trim(),
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = RussianViolet
+                    )
+
+                    // Show startup name or firm name
+                    val subtitle = if (user.userType == "founder") {
+                        user.profileData?.startupName ?: "Founder"
+                    } else {
+                        user.profileData?.nameFirm ?: "Investor"
+                    }
+                    Text(
+                        text = subtitle,
+                        fontSize = 14.sp,
+                        color = CaputMortuum,
+                        fontWeight = FontWeight.Medium
+                    )
+
+                    // Show industry
+                    user.profileData?.industry?.let { industry ->
+                        Text(
+                            text = industry,
+                            fontSize = 12.sp,
+                            color = Glaucous
+                        )
+                    }
+                }
+            }
+
+            // Description (for founders)
+            user.profileData?.description?.let { desc ->
+                Spacer(Modifier.height(12.dp))
+                Text(
+                    text = desc,
+                    fontSize = 14.sp,
+                    color = RussianViolet.copy(alpha = 0.7f),
+                    maxLines = 2
+                )
+            }
+
+            // Location (for founders)
+            if (user.userType == "founder") {
+                user.profileData?.location?.let { location ->
+                    Spacer(Modifier.height(8.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "📍 $location",
+                            fontSize = 12.sp,
+                            color = Color.Gray
+                        )
+                        user.profileData.fundingStage?.let { stage ->
+                            Text(
+                                text = " • $stage",
+                                fontSize = 12.sp,
+                                color = Color.Gray
+                            )
+                        }
+                    }
+                }
+            }
+
+            Spacer(Modifier.height(12.dp))
+
+            // Action Buttons - Show different buttons based on user types
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                // Connect Button (for everyone)
+                Button(
+                    onClick = onConnect,
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = RussianViolet
+                    ),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text("Connect", color = PureWhite, fontWeight = FontWeight.SemiBold)
+                }
+
+                // Support Project Button (only for investors viewing founders)
+                if (currentUserType == "investor" && user.userType == "founder") {
+                    Button(
+                        onClick = onSupportProject,
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Glaucous
+                        ),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text("Support", color = PureWhite, fontWeight = FontWeight.SemiBold)
+                    }
+                }
+            }
         }
     }
 }

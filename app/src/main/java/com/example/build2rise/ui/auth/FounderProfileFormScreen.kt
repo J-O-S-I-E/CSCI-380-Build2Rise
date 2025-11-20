@@ -6,8 +6,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -23,9 +22,9 @@ import com.example.build2rise.ui.theme.RussianViolet
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FounderProfileScreen(
+fun FounderProfileFormScreen(
     onBack: () -> Unit,
-    onContinue: () -> Unit
+    onContinue: (FounderFormData) -> Unit
 ) {
     var startupName by remember { mutableStateOf("") }
     var industry by remember { mutableStateOf("") }
@@ -49,7 +48,7 @@ fun FounderProfileScreen(
         ) {
             IconButton(onClick = onBack) {
                 Icon(
-                    imageVector = Icons.Default.ArrowBack,
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Back",
                     tint = RussianViolet
                 )
@@ -66,7 +65,6 @@ fun FounderProfileScreen(
                 ProgressDot(isActive = false)
             }
 
-            // Empty space for symmetry
             Spacer(modifier = Modifier.width(48.dp))
         }
 
@@ -113,6 +111,8 @@ fun FounderProfileScreen(
                 // Industry
                 AuthDropdownField(
                     label = "Industry",
+                    selectedValue = industry,
+                    onValueChange = { industry = it },
                     placeholder = "Select Industry",
                     options = listOf(
                         "Fintech", "HealthTech", "EdTech", "CleanTech",
@@ -123,6 +123,8 @@ fun FounderProfileScreen(
                 // Location
                 AuthDropdownField(
                     label = "Location",
+                    selectedValue = location,
+                    onValueChange = { location = it },
                     placeholder = "Select Location",
                     options = listOf(
                         "New York, NY", "San Francisco, CA", "Boston, MA",
@@ -133,6 +135,8 @@ fun FounderProfileScreen(
                 // Team Size
                 AuthDropdownField(
                     label = "Team Size",
+                    selectedValue = teamSize,
+                    onValueChange = { teamSize = it },
                     placeholder = "Select Team Size",
                     options = listOf(
                         "1-5", "6-10", "11-20", "21-50", "50+"
@@ -142,6 +146,8 @@ fun FounderProfileScreen(
                 // Funding Stage
                 AuthDropdownField(
                     label = "Funding Stage",
+                    selectedValue = fundingStage,
+                    onValueChange = { fundingStage = it },
                     placeholder = "Select Funding Stage",
                     options = listOf(
                         "Idea/Pre-seed", "Seed", "Series A",
@@ -186,7 +192,18 @@ fun FounderProfileScreen(
 
             // Continue Button
             Button(
-                onClick = onContinue,
+                onClick = {
+                    onContinue(
+                        FounderFormData(
+                            startupName = startupName,
+                            industry = industry.takeIf { it.isNotBlank() },
+                            location = location.takeIf { it.isNotBlank() },
+                            teamSize = teamSize.takeIf { it.isNotBlank() },
+                            fundingStage = fundingStage.takeIf { it.isNotBlank() },
+                            description = description.takeIf { it.isNotBlank() }
+                        )
+                    )
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
@@ -205,104 +222,6 @@ fun FounderProfileScreen(
             }
 
             Spacer(modifier = Modifier.height(40.dp))
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun AuthTextField(
-    label: String,
-    value: String,
-    onValueChange: (String) -> Unit,
-    placeholder: String
-) {
-    Column {
-        Text(
-            text = label,
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Medium,
-            color = RussianViolet,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-        OutlinedTextField(
-            value = value,
-            onValueChange = onValueChange,
-            placeholder = {
-                Text(text = placeholder, color = Color.Gray)
-            },
-            modifier = Modifier.fillMaxWidth(),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = PureWhite,
-                unfocusedContainerColor = PureWhite,
-                focusedBorderColor = Glaucous,
-                unfocusedBorderColor = Color.LightGray
-            ),
-            shape = RoundedCornerShape(12.dp),
-            singleLine = true
-        )
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun AuthDropdownField(
-    label: String,
-    placeholder: String,
-    options: List<String>
-) {
-    var expanded by remember { mutableStateOf(false) }
-    var selectedOption by remember { mutableStateOf("") }
-
-    Column {
-        Text(
-            text = label,
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Medium,
-            color = RussianViolet,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-        ExposedDropdownMenuBox(
-            expanded = expanded,
-            onExpandedChange = { expanded = !expanded }
-        ) {
-            OutlinedTextField(
-                value = selectedOption.ifEmpty { placeholder },
-                onValueChange = {},
-                readOnly = true,
-                trailingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.ArrowDropDown,
-                        contentDescription = "Dropdown",
-                        tint = Color.Gray
-                    )
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .menuAnchor(),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = PureWhite,
-                    unfocusedContainerColor = PureWhite,
-                    focusedBorderColor = Glaucous,
-                    unfocusedBorderColor = Color.LightGray,
-                    disabledTextColor = if (selectedOption.isEmpty()) Color.Gray else RussianViolet
-                ),
-                shape = RoundedCornerShape(12.dp)
-            )
-            ExposedDropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false }
-            ) {
-                options.forEach { option ->
-                    DropdownMenuItem(
-                        text = { Text(option) },
-                        onClick = {
-                            selectedOption = option
-                            expanded = false
-                        }
-                    )
-                }
-            }
         }
     }
 }

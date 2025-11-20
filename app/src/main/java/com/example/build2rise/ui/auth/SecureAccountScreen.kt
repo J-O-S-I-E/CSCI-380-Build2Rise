@@ -6,7 +6,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
@@ -23,20 +23,59 @@ import com.example.build2rise.ui.theme.Almond
 import com.example.build2rise.ui.theme.Glaucous
 import com.example.build2rise.ui.theme.PureWhite
 import com.example.build2rise.ui.theme.RussianViolet
+import com.example.build2rise.ui.viewmodel.AuthViewModel
+import com.example.build2rise.ui.viewmodel.AuthState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SecureAccountScreen(
+    viewModel: AuthViewModel,
+    userType: String,
     onBack: () -> Unit,
-    onCreateAccount: () -> Unit,
     onLoginClick: () -> Unit
 ) {
-    var fullName by remember { mutableStateOf("") }
+    var firstName by remember { mutableStateOf("") }
+    var lastName by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var showPassword by remember { mutableStateOf(false) }
     var showConfirmPassword by remember { mutableStateOf(false) }
+
+    var passwordError by remember { mutableStateOf<String?>(null) }
+    var emailError by remember { mutableStateOf<String?>(null) }
+
+    val authState by viewModel.authState.collectAsState()
+
+    // Show error dialog if registration fails
+    var showErrorDialog by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf("") }
+
+    LaunchedEffect(authState) {
+        when (val state = authState) {
+            is AuthState.Error -> {
+                errorMessage = state.message
+                showErrorDialog = true
+            }
+            else -> {}
+        }
+    }
+
+    if (showErrorDialog) {
+        AlertDialog(
+            onDismissRequest = { showErrorDialog = false },
+            title = { Text("Registration Error") },
+            text = { Text(errorMessage) },
+            confirmButton = {
+                TextButton(onClick = {
+                    showErrorDialog = false
+                    viewModel.resetState()
+                }) {
+                    Text("OK")
+                }
+            }
+        )
+    }
 
     Column(
         modifier = Modifier
@@ -53,7 +92,7 @@ fun SecureAccountScreen(
         ) {
             IconButton(onClick = onBack) {
                 Icon(
-                    imageVector = Icons.Default.ArrowBack,
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Back",
                     tint = RussianViolet
                 )
@@ -70,7 +109,6 @@ fun SecureAccountScreen(
                 ProgressDot(isActive = true)
             }
 
-            // Empty space for symmetry
             Spacer(modifier = Modifier.width(48.dp))
         }
 
@@ -106,21 +144,44 @@ fun SecureAccountScreen(
             Column(
                 verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
-                // Full Name
+                // First Name
                 AuthTextField(
-                    label = "Full Name",
-                    value = fullName,
-                    onValueChange = { fullName = it },
-                    placeholder = "Enter your full name"
+                    label = "First Name",
+                    value = firstName,
+                    onValueChange = { firstName = it },
+                    placeholder = "Enter your first name"
+                )
+
+                // Last Name
+                AuthTextField(
+                    label = "Last Name",
+                    value = lastName,
+                    onValueChange = { lastName = it },
+                    placeholder = "Enter your last name"
                 )
 
                 // Email
-                AuthTextField(
-                    label = "Email",
-                    value = email,
-                    onValueChange = { email = it },
-                    placeholder = "your@email.com"
-                )
+                Column {
+                    AuthTextField(
+                        label = "Email",
+                        value = email,
+                        onValueChange = {
+                            email = it
+                            emailError = if (it.isNotEmpty() && !android.util.Patterns.EMAIL_ADDRESS.matcher(it).matches()) {
+                                "Invalid email format"
+                            } else null
+                        },
+                        placeholder = "your@email.com"
+                    )
+                    if (emailError != null) {
+                        Text(
+                            text = emailError!!,
+                            color = Color.Red,
+                            fontSize = 12.sp,
+                            modifier = Modifier.padding(start = 4.dp, top = 4.dp)
+                        )
+                    }
+                }
 
                 // Password
                 Column {
@@ -133,7 +194,13 @@ fun SecureAccountScreen(
                     )
                     OutlinedTextField(
                         value = password,
-                        onValueChange = { password = it },
+                        onValueChange = {
+                            password = it
+                            passwordError = when {
+                                it.length < 6 -> "Password must be at least 6 characters"
+                                else -> null
+                            }
+                        },
                         placeholder = {
                             Text(text = "Create a strong password", color = Color.Gray)
                         },
@@ -163,6 +230,14 @@ fun SecureAccountScreen(
                             }
                         }
                     )
+                    if (passwordError != null) {
+                        Text(
+                            text = passwordError!!,
+                            color = Color.Red,
+                            fontSize = 12.sp,
+                            modifier = Modifier.padding(start = 4.dp, top = 4.dp)
+                        )
+                    }
                 }
 
                 // Confirm Password
@@ -206,6 +281,14 @@ fun SecureAccountScreen(
                             }
                         }
                     )
+                    if (confirmPassword.isNotEmpty() && password != confirmPassword) {
+                        Text(
+                            text = "Passwords do not match",
+                            color = Color.Red,
+                            fontSize = 12.sp,
+                            modifier = Modifier.padding(start = 4.dp, top = 4.dp)
+                        )
+                    }
                 }
             }
 
@@ -213,7 +296,15 @@ fun SecureAccountScreen(
 
             // Create Account Button
             Button(
-                onClick = onCreateAccount,
+                onClick = {
+                    viewModel.register(
+                        email = email,
+                        password = password,
+                        firstName = firstName,
+                        lastName = lastName,
+                        userType = userType
+                    )
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
@@ -221,18 +312,29 @@ fun SecureAccountScreen(
                 colors = ButtonDefaults.buttonColors(
                     containerColor = RussianViolet
                 ),
-                enabled = fullName.isNotBlank() &&
+                enabled = firstName.isNotBlank() &&
+                        lastName.isNotBlank() &&
                         email.isNotBlank() &&
                         password.isNotBlank() &&
                         confirmPassword.isNotBlank() &&
-                        password == confirmPassword
+                        password == confirmPassword &&
+                        passwordError == null &&
+                        emailError == null &&
+                        authState !is AuthState.Loading
             ) {
-                Text(
-                    text = "Create Account",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = PureWhite
-                )
+                if (authState is AuthState.Loading) {
+                    CircularProgressIndicator(
+                        color = PureWhite,
+                        modifier = Modifier.size(24.dp)
+                    )
+                } else {
+                    Text(
+                        text = "Create Account",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = PureWhite
+                    )
+                }
             }
 
             // Login Link

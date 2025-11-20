@@ -6,7 +6,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
@@ -24,18 +24,52 @@ import com.example.build2rise.ui.theme.Almond
 import com.example.build2rise.ui.theme.Glaucous
 import com.example.build2rise.ui.theme.PureWhite
 import com.example.build2rise.ui.theme.RussianViolet
+import com.example.build2rise.ui.viewmodel.AuthViewModel
+import com.example.build2rise.ui.viewmodel.AuthState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
+    viewModel: AuthViewModel,
     onBack: () -> Unit,
-    onLogin: () -> Unit,
     onSignUp: () -> Unit,
     onForgotPassword: () -> Unit
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var showPassword by remember { mutableStateOf(false) }
+
+    val authState by viewModel.authState.collectAsState()
+
+    // Show error dialog if login fails
+    var showErrorDialog by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf("") }
+
+    LaunchedEffect(authState) {
+        when (val state = authState) {
+            is AuthState.Error -> {
+                errorMessage = state.message
+                showErrorDialog = true
+            }
+            else -> {}
+        }
+    }
+
+    if (showErrorDialog) {
+        AlertDialog(
+            onDismissRequest = { showErrorDialog = false },
+            title = { Text("Login Error") },
+            text = { Text(errorMessage) },
+            confirmButton = {
+                TextButton(onClick = {
+                    showErrorDialog = false
+                    viewModel.resetState()
+                }) {
+                    Text("OK")
+                }
+            }
+        )
+    }
 
     Column(
         modifier = Modifier
@@ -48,7 +82,7 @@ fun LoginScreen(
             modifier = Modifier.padding(16.dp)
         ) {
             Icon(
-                imageVector = Icons.Default.ArrowBack,
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                 contentDescription = "Back",
                 tint = RussianViolet
             )
@@ -164,7 +198,9 @@ fun LoginScreen(
 
             // Login Button
             Button(
-                onClick = onLogin,
+                onClick = {
+                    viewModel.login(email = email, password = password)
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
@@ -172,14 +208,23 @@ fun LoginScreen(
                 colors = ButtonDefaults.buttonColors(
                     containerColor = RussianViolet
                 ),
-                enabled = email.isNotBlank() && password.isNotBlank()
+                enabled = email.isNotBlank() &&
+                        password.isNotBlank() &&
+                        authState !is AuthState.Loading
             ) {
-                Text(
-                    text = "Login",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = PureWhite
-                )
+                if (authState is AuthState.Loading) {
+                    CircularProgressIndicator(
+                        color = PureWhite,
+                        modifier = Modifier.size(24.dp)
+                    )
+                } else {
+                    Text(
+                        text = "Login",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = PureWhite
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
