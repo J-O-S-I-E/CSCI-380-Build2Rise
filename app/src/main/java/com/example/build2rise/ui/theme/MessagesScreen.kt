@@ -25,6 +25,14 @@ import com.example.build2rise.ui.viewmodel.ConversationsState
 import java.time.Instant
 import java.time.ZoneId
 import java.time.temporal.ChronoUnit
+import com.example.build2rise.data.model.PostResponse
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.Text
+import androidx.compose.ui.unit.dp
+
+
 
 @Composable
 fun MessagesScreen(
@@ -252,5 +260,33 @@ fun formatMessageTime(timestamp: String?): String {
         }
     } catch (e: Exception) {
         ""
+    }
+}
+@Composable
+fun SharedPostPreviewCard(post: PostResponse) {
+    Card(
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = PureWhite),
+        border = androidx.compose.foundation.BorderStroke(1.dp, Almond),
+        modifier = Modifier
+            .padding(start = 16.dp, end = 16.dp, bottom = 8.dp)
+            .fillMaxWidth()
+    ) {
+        Column(Modifier.padding(12.dp)) {
+            Text(
+                text = "${post.firstName ?: ""} ${post.lastName ?: ""}".trim()
+                    .ifEmpty { "User" },
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 14.sp,
+                color = RussianViolet
+            )
+            Spacer(Modifier.height(4.dp))
+            Text(
+                text = post.postDescription ?: "[No description]",
+                fontSize = 13.sp,
+                color = RussianViolet.copy(alpha = 0.8f),
+                maxLines = 3
+            )
+        }
     }
 }

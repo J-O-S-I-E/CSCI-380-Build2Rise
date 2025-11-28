@@ -16,7 +16,9 @@ data class PostResponse(
     val postType: String,
     val mediaUrl: String?,
     val postingDate: String,
-    val createdAt: String
+    val createdAt: String,
+    val likedByCurrentUser: Boolean = false
+
 )
 
 data class FeedResponse(

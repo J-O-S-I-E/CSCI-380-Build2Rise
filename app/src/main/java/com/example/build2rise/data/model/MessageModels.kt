@@ -2,7 +2,8 @@ package com.example.build2rise.data.model
 
 data class SendMessageRequest(
     val receiverId: String,
-    val content: String
+    val content: String,
+    val sharedPostId: String? = null
 )
 
 data class MessageResponse(
@@ -15,7 +16,8 @@ data class MessageResponse(
     val receiverLastName: String?,
     val content: String,
     val readStatus: Boolean,
-    val timestamp: String
+    val timestamp: String,
+    val sharedPostId: String? = null
 )
 
 data class ConversationResponse(

@@ -3,6 +3,18 @@ package com.example.build2rise.data.api
 import com.example.build2rise.data.model.*
 import retrofit2.Response
 import retrofit2.http.*
+import retrofit2.http.Body
+import retrofit2.http.GET
+import retrofit2.http.POST
+import retrofit2.http.Path
+import retrofit2.http.Header
+import com.example.build2rise.data.model.AddCommentRequest
+import com.example.build2rise.data.model.CommentDto
+import com.example.build2rise.data.model.UserInfo
+
+
+
+
 
 interface ApiService {
 
@@ -141,4 +153,58 @@ interface ApiService {
         @Header("Authorization") token: String,
         @Path("founderUserId") founderUserId: String
     ): Response<Map<String, Boolean>>
+
+    // --- LIKE ---
+    @POST("posts/{postId}/like")
+    suspend fun toggleLike(
+        @Header("Authorization") token: String,
+        @Path("postId") postId: String
+    ): Response<PostInteractionResponse>
+
+    // --- COMMENT: add a comment ---
+    @POST("posts/{postId}/comments")
+    suspend fun addComment(
+        @Header("Authorization") token: String,
+        @Path("postId") postId: String,
+        @Body request: AddCommentRequest
+    ): Response<CommentDto>
+
+    // --- COMMENT: get comments ---
+    @GET("posts/{postId}/comments")
+    suspend fun getCommentsForPost(
+        @Header("Authorization") token: String,
+        @Path("postId") postId: String
+    ): Response<List<CommentDto>>
+
+    // --- SHARE ---
+    @POST("posts/{postId}/share")
+    suspend fun sharePost(
+        @Header("Authorization") token: String,
+        @Path("postId") postId: String
+    ): Response<PostInteractionResponse>
+
+    // --- INTERACTIONS: like/comment/share status for THIS user ---
+    @GET("posts/{postId}/interactions")
+    suspend fun getPostInteractions(
+        @Header("Authorization") token: String,
+        @Path("postId") postId: String
+    ): Response<PostInteractionResponse>
+
+    @GET("users/search-messages")
+    suspend fun searchUsersForMessages(
+        @Header("Authorization") token: String,
+        @Query("q") query: String
+    ): retrofit2.Response<List<UserInfo>>
+
+    @GET("posts/{postId}")
+    suspend fun getPostById(
+        @Header("Authorization") token: String,
+        @Path("postId") postId: String
+    ): Response<PostResponse>
+
+
+
+
+
+
 }

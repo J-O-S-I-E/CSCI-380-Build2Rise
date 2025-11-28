@@ -27,6 +27,15 @@ import com.example.build2rise.ui.viewmodel.SendMessageState
 import com.example.build2rise.ui.viewmodel.ProfileViewModel
 import com.example.build2rise.ui.viewmodel.ProfileState
 import kotlinx.coroutines.launch
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -175,9 +184,11 @@ fun ChatScreen(
                             verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             items(state.conversation.messages) { message ->
+                                val isMe = message.senderId == currentUserId
                                 MessageBubble(
                                     message = message,
-                                    currentUserId = currentUserId
+                                    isMe = isMe,
+                                    messageViewModel = viewModel
                                 )
                             }
                         }
@@ -208,48 +219,7 @@ fun ChatScreen(
     }
 }
 
-@Composable
-fun MessageBubble(
-    message: MessageResponse,
-    currentUserId: String
-) {
-    // Message is from current user if senderId matches currentUserId
-    val isCurrentUser = message.senderId == currentUserId
 
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = if (isCurrentUser) Arrangement.End else Arrangement.Start
-    ) {
-        Box(
-            modifier = Modifier
-                .widthIn(max = 280.dp)
-                .background(
-                    color = if (isCurrentUser) RussianViolet else Almond,
-                    shape = RoundedCornerShape(
-                        topStart = 16.dp,
-                        topEnd = 16.dp,
-                        bottomStart = if (isCurrentUser) 16.dp else 4.dp,
-                        bottomEnd = if (isCurrentUser) 4.dp else 16.dp
-                    )
-                )
-                .padding(12.dp)
-        ) {
-            Column {
-                Text(
-                    text = message.content,
-                    color = if (isCurrentUser) PureWhite else RussianViolet,
-                    fontSize = 15.sp
-                )
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    text = formatMessageTime(message.timestamp),
-                    color = if (isCurrentUser) PureWhite.copy(alpha = 0.7f) else Color.Gray,
-                    fontSize = 11.sp
-                )
-            }
-        }
-    }
-}
 
 @Composable
 fun MessageInputBar(
@@ -299,3 +269,53 @@ fun MessageInputBar(
         }
     }
 }
+@Composable
+fun MessageBubble(
+    message: MessageResponse,
+    isMe: Boolean,
+    messageViewModel: MessageViewModel
+) {
+    val sharedPosts by messageViewModel.sharedPosts.collectAsState()
+    val sharedPostId = message.sharedPostId
+
+    // If this message references a post, ensure we have it loaded
+    LaunchedEffect(sharedPostId) {
+        if (sharedPostId != null && !sharedPosts.containsKey(sharedPostId)) {
+            messageViewModel.loadSharedPost(sharedPostId)
+        }
+    }
+
+    val sharedPost = sharedPostId?.let { sharedPosts[it] }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp, vertical = 4.dp),
+        horizontalAlignment = if (isMe) Alignment.End else Alignment.Start
+    ) {
+        // Message bubble text
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(16.dp))
+                .background(
+                    if (isMe) MaterialTheme.colorScheme.primary
+                    else MaterialTheme.colorScheme.surfaceVariant
+                )
+                .padding(horizontal = 12.dp, vertical = 8.dp)
+        ) {
+            Text(
+                text = message.content,
+                color = if (isMe) MaterialTheme.colorScheme.onPrimary
+                else MaterialTheme.colorScheme.onSurfaceVariant,
+                fontSize = 14.sp
+            )
+        }
+
+        // 🔥 If this message has a shared post, show the preview card below
+        if (sharedPost != null) {
+            Spacer(Modifier.height(4.dp))
+            SharedPostPreviewCard(sharedPost)
+        }
+    }
+}
+
