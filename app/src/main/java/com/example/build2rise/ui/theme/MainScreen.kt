@@ -87,7 +87,7 @@ fun MainScreen(userType: String = "founder") {
                     // Switch between screens based on selected tab
                     when (selectedTab) {
                         "Feed" -> FeedScreen()
-                        "AI Search" -> AISearchScreen()
+                        "Search" -> AISearchScreen()
 //                    "Messages" -> MessagesScreen()
                         "Messages" -> {
                             var showChatScreen by remember { mutableStateOf(false) }
@@ -147,7 +147,7 @@ fun BottomNavigationBar(
             onClick = onTabSelected
         )
         BottomNavItem(
-            label = "AI Search",
+            label = "Search",
             icon = Icons.Filled.Search,
             selected = selectedTab,
             onClick = onTabSelected

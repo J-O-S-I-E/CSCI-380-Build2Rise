@@ -1,4 +1,3 @@
-
 package com.example.build2rise.ui.theme
 
 import androidx.compose.foundation.background
@@ -35,16 +34,11 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import com.example.build2rise.data.model.CommentDto
 import com.example.build2rise.ui.viewmodel.MessageViewModel
 import com.example.build2rise.data.model.PostResponse
-import com.example.build2rise.data.model.ConversationResponse
 import androidx.compose.ui.window.Dialog
-
-
-
-
-
-
-
-
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.layout.ContentScale
+import coil.compose.AsyncImage
+import kotlin.text.contains
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -62,9 +56,9 @@ fun FeedScreen(
     var commentText by remember { mutableStateOf("") }
 
     var showShareDialog by remember { mutableStateOf(false) }
-    var selectedPostForShare by remember { mutableStateOf<com.example.build2rise.data.model.PostResponse?>(null) }
+    var selectedPostForShare by remember { mutableStateOf<PostResponse?>(null) }
 
-
+    val context = LocalContext.current
 
     if (showCommentDialog) {
         AddCommentDialog(
@@ -91,8 +85,6 @@ fun FeedScreen(
         )
     }
 
-
-
     val postState by postViewModel.postState.collectAsState()
     val profileState by profileViewModel.profileState.collectAsState()
     val likedPosts by postViewModel.likedPosts.collectAsState()
@@ -105,12 +97,6 @@ fun FeedScreen(
         is com.example.build2rise.ui.viewmodel.ConversationsState.Success -> s.conversations
         else -> emptyList()
     }
-
-
-
-
-
-
 
     // Load posts and profile on screen open
     LaunchedEffect(Unit) {
@@ -133,8 +119,18 @@ fun FeedScreen(
         PostCreationModal(
             userInitials = userInitials,
             onDismiss = { showPostModal = false },
-            onPost = { description, mediaType ->
-                postViewModel.createPost(description)
+            onPost = { description, fileUri ->
+                if (fileUri != null) {
+                    // Upload with media
+                    postViewModel.createPostWithMedia(
+                        description = description.ifBlank { null },
+                        fileUri = fileUri,
+                        context = context
+                    )
+                } else {
+                    // Text-only post
+                    postViewModel.createPost(description)
+                }
                 showPostModal = false
             }
         )
@@ -237,31 +233,23 @@ fun FeedScreen(
                     ),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    // Share Update Section (only show on Founders tab)
-//                    if (selectedTab == 0) {
-//                        item {
-//                            ShareUpdateCard(
-//                                userInitials = userInitials,
-//                                onClick = { showPostModal = true }
-//                            )
-//                        }
-//                    }
-
                     // Posts
                     items(filteredPosts) { post ->
                         val commentsForPost = commentsByPostId[post.id] ?: emptyList()
                         RealPostCard(
                             post = post,
-                            isLiked =  likedPostIds.contains(post.id),
+                            isLiked = likedPostIds.contains(post.id),
                             comments = commentsForPost,
-                            onLike = {  postViewModel.likePost(post.id) },
+                            onLike = { postViewModel.likePost(post.id) },
                             onComment = {
                                 selectedPostIdForComment = post.id
                                 showCommentDialog = true
                                 postViewModel.loadComments(post.id)
                             },
-                            onShare = { selectedPostForShare = post
-                                showShareDialog = true }
+                            onShare = {
+                                selectedPostForShare = post
+                                showShareDialog = true
+                            }
                         )
                     }
 
@@ -290,8 +278,8 @@ fun FeedScreen(
                 Box(modifier = Modifier.fillMaxSize())
             }
         }
-        // Share via message dialog
 
+        // Share via message dialog
         if (showShareDialog && selectedPostForShare != null) {
             SharePostDialogNew(
                 messageViewModel = messageViewModel,
@@ -306,10 +294,9 @@ fun FeedScreen(
                 }
             )
         }
-
-
     }
 }
+
 @Composable
 fun AddCommentDialog(
     commentText: String,
@@ -322,7 +309,7 @@ fun AddCommentDialog(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(20.dp))
-                .background(Almond) // light beige like your post modal
+                .background(Almond)
                 .padding(20.dp)
         ) {
             Column(
@@ -336,7 +323,6 @@ fun AddCommentDialog(
                     )
                 )
 
-                // Beige text area
                 TextField(
                     value = commentText,
                     onValueChange = onCommentChange,
@@ -349,7 +335,7 @@ fun AddCommentDialog(
                             color = RussianViolet,
                             shape = RoundedCornerShape(12.dp)
                         )
-                        .background(Almond), // beige background
+                        .background(Almond),
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = Almond,
                         unfocusedContainerColor = Almond,
@@ -365,7 +351,6 @@ fun AddCommentDialog(
                             fontSize = 14.sp
                         )
                     }
-
                 )
 
                 Row(
@@ -381,7 +366,6 @@ fun AddCommentDialog(
 
                     Spacer(modifier = Modifier.width(20.dp))
 
-                    // Blue/purple rounded Post button like your share modal
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(50.dp))
@@ -402,138 +386,6 @@ fun AddCommentDialog(
 }
 
 @Composable
-fun SharePostDialog(
-    postText: String,
-    conversations: List<com.example.build2rise.data.model.ConversationResponse>,
-    onDismiss: () -> Unit,
-    onSend: (receiverId: String) -> Unit
-) {
-    var searchQuery by remember { mutableStateOf("") }
-    var selectedUserId by remember { mutableStateOf<String?>(null) }
-
-    val filtered = if (searchQuery.isBlank()) {
-        conversations
-    } else {
-        conversations.filter { conv ->
-            val name = "${conv.firstName} ${conv.lastName}".trim()
-            name.contains(searchQuery, ignoreCase = true)
-        }
-    }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = {
-            Text(
-                text = "Share post via message",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold
-            )
-        },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                // Post preview
-                Text(
-                    text = postText,
-                    fontSize = 14.sp,
-                    color = RussianViolet.copy(alpha = 0.8f)
-                )
-
-                OutlinedTextField(
-                    value = searchQuery,
-                    onValueChange = { searchQuery = it },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    placeholder = { Text("Search by name", fontSize = 14.sp) },
-                    shape = RoundedCornerShape(12.dp)
-                )
-
-                if (filtered.isEmpty()) {
-                    Text(
-                        text = "No conversations found.",
-                        fontSize = 13.sp,
-                        color = Color.Gray
-                    )
-                } else {
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .heightIn(max = 240.dp),
-                        verticalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        items(filtered) { conv ->
-                            val name = "${conv.firstName} ${conv.lastName}".trim()
-                            val isSelected = selectedUserId == conv.userId
-
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .background(
-                                        if (isSelected) Almond else Color.Transparent
-                                    )
-                                    .clickable { selectedUserId = conv.userId }
-                                    .padding(8.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                // initials circle
-                                Box(
-                                    modifier = Modifier
-                                        .size(32.dp)
-                                        .clip(CircleShape)
-                                        .background(RussianViolet),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    val initials =
-                                        "${conv.firstName?.firstOrNull() ?: ""}${conv.lastName?.firstOrNull() ?: ""}"
-                                    Text(
-                                        text = initials.ifEmpty { "U" },
-                                        color = PureWhite,
-                                        fontSize = 13.sp,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                }
-
-                                Spacer(Modifier.width(8.dp))
-
-                                Column {
-                                    Text(
-                                        text = name.ifEmpty { "User" },
-                                        fontSize = 14.sp,
-                                        fontWeight = FontWeight.SemiBold,
-                                        color = RussianViolet
-                                    )
-                                    if (!conv.lastMessage.isNullOrBlank()) {
-                                        Text(
-                                            text = conv.lastMessage!!,
-                                            fontSize = 12.sp,
-                                            maxLines = 1,
-                                            color = Color.Gray
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(
-                enabled = selectedUserId != null,
-                onClick = {
-                    selectedUserId?.let { onSend(it) }
-                }
-            ) { Text("Send") }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
-            }
-        }
-    )
-}
-
-@Composable
 fun SharePostDialogNew(
     messageViewModel: MessageViewModel,
     post: PostResponse,
@@ -548,14 +400,12 @@ fun SharePostDialogNew(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(20.dp))
-                .background(Almond)               // same brownish bg as Add Comment
+                .background(Almond)
                 .padding(20.dp)
         ) {
             Column(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-
-                // Title
                 Text(
                     text = "Share post via message",
                     fontSize = 18.sp,
@@ -563,14 +413,12 @@ fun SharePostDialogNew(
                     color = RussianViolet
                 )
 
-                // Post preview
                 Text(
                     text = post.postDescription ?: "[No description]",
                     fontSize = 14.sp,
                     color = RussianViolet.copy(alpha = 0.8f)
                 )
 
-                // Search box (outlined beige, same style as comment box)
                 TextField(
                     value = state.query,
                     onValueChange = { messageViewModel.onShareSearchQueryChange(it) },
@@ -624,7 +472,6 @@ fun SharePostDialogNew(
                     )
                 }
 
-                // Results list
                 if (state.results.isEmpty() && state.query.isNotBlank() && !state.isSearching) {
                     Text(
                         text = "No users found.",
@@ -652,7 +499,6 @@ fun SharePostDialogNew(
                                     .padding(8.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                // initials circle
                                 Box(
                                     modifier = Modifier
                                         .size(32.dp)
@@ -695,7 +541,6 @@ fun SharePostDialogNew(
                     }
                 }
 
-                // Buttons row (same as Add Comment)
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End,
@@ -744,8 +589,6 @@ fun SharePostDialogNew(
     }
 }
 
-
-
 @Composable
 fun FeedTopBar(
     onAddClick: () -> Unit
@@ -765,7 +608,6 @@ fun FeedTopBar(
             color = RussianViolet
         )
 
-        // + Button
         IconButton(onClick = onAddClick) {
             Icon(
                 imageVector = Icons.Filled.Add,
@@ -776,75 +618,10 @@ fun FeedTopBar(
         }
     }
 }
-//
-//@Composable
-//fun ShareUpdateCard(
-//    userInitials: String,
-//    onClick: () -> Unit
-//) {
-//    Card(
-//        modifier = Modifier.fillMaxWidth(),
-//        shape = RoundedCornerShape(16.dp),
-//        colors = CardDefaults.cardColors(containerColor = Almond),
-//        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-//    ) {
-//        Column(
-//            modifier = Modifier.padding(16.dp),
-//            verticalArrangement = Arrangement.spacedBy(12.dp)
-//        ) {
-//            // Profile + Input Row
-//            Row(
-//                modifier = Modifier.fillMaxWidth(),
-//                horizontalArrangement = Arrangement.spacedBy(12.dp),
-//                verticalAlignment = Alignment.CenterVertically
-//            ) {
-//                // User Avatar with real initials
-//                Box(
-//                    modifier = Modifier
-//                        .size(48.dp)
-//                        .clip(CircleShape)
-//                        .background(RussianViolet),
-//                    contentAlignment = Alignment.Center
-//                ) {
-//                    Text(
-//                        text = userInitials,
-//                        color = PureWhite,
-//                        fontWeight = FontWeight.Bold,
-//                        fontSize = 16.sp
-//                    )
-//                }
-//
-//                // Input Field
-//                Row(
-//                    modifier = Modifier
-//                        .weight(1f)
-//                        .clip(RoundedCornerShape(24.dp))
-//                        .background(PureWhite)
-//                        .clickable(onClick = onClick)
-//                        .padding(horizontal = 16.dp, vertical = 12.dp),
-//                    horizontalArrangement = Arrangement.SpaceBetween,
-//                    verticalAlignment = Alignment.CenterVertically
-//                ) {
-//                    Text(
-//                        text = "Share an update",
-//                        color = Color.Gray,
-//                        fontSize = 14.sp
-//                    )
-//                    Icon(
-//                        imageVector = Icons.Default.Send,
-//                        contentDescription = "Send",
-//                        tint = RussianViolet,
-//                        modifier = Modifier.size(20.dp)
-//                    )
-//                }
-//            }
-//        }
-//    }
-//}
 
 @Composable
 fun RealPostCard(
-    post: com.example.build2rise.data.model.PostResponse,
+    post: PostResponse,
     isLiked: Boolean,
     comments: List<CommentDto>,
     onLike: () -> Unit,
@@ -871,7 +648,6 @@ fun RealPostCard(
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Avatar with initials
                     Box(
                         modifier = Modifier
                             .size(48.dp)
@@ -888,7 +664,6 @@ fun RealPostCard(
                         )
                     }
 
-                    // Author Info
                     Column {
                         Text(
                             text = "${post.firstName ?: ""} ${post.lastName ?: ""}".trim()
@@ -905,7 +680,6 @@ fun RealPostCard(
                     }
                 }
 
-                // Action Icon
                 IconButton(onClick = { /* More options */ }) {
                     Icon(
                         imageVector = Icons.Outlined.MoreVert,
@@ -927,28 +701,61 @@ fun RealPostCard(
                 )
             }
 
-            // Media placeholder if post has media
+            // Media display - CORRECTED VERSION
             if (post.mediaUrl != null) {
                 Spacer(modifier = Modifier.height(12.dp))
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(150.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(Almond),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = post.postType,
-                        color = Color.Gray,
-                        fontSize = 14.sp
-                    )
+
+                // DEBUG LOG
+                Log.d("POST_MEDIA", "Post ID: ${post.id}, Type: ${post.postType}, URL: ${post.mediaUrl}")
+
+                when (post.postType) {
+                    "image" -> {
+                        AsyncImage(
+                            model = post.mediaUrl,
+                            contentDescription = "Post image",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(max = 400.dp)
+                                .clip(RoundedCornerShape(12.dp)),
+                            contentScale = ContentScale.Crop,
+                            onLoading = {
+                                Log.d("POST_MEDIA", "Loading image: ${post.mediaUrl}")
+                            },
+                            onSuccess = {
+                                Log.d("POST_MEDIA", "Image loaded successfully: ${post.mediaUrl}")
+                            },
+                            onError = { error ->
+                                Log.e("POST_MEDIA", "Failed to load image: ${post.mediaUrl}", error.result.throwable)
+                            }
+                        )
+                    }
+                    "video" -> {
+                        // Use the actual video player
+                        SimpleVideoPlayer(
+                            videoUrl = post.mediaUrl,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                    else -> {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(150.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(Almond),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "Unknown type: ${post.postType}",
+                                color = Color.Gray,
+                                fontSize = 14.sp
+                            )
+                        }
+                    }
                 }
             }
 
-
-
-
+            // Comments
             if (comments.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(12.dp))
                 comments.forEach { comment ->
@@ -956,11 +763,6 @@ fun RealPostCard(
                     CommentRow(comment = comment)
                 }
             }
-
-
-
-            // Engagement Actions   <-- keep your existing code from here down
-
 
             // Engagement Actions
             Spacer(modifier = Modifier.height(16.dp))
@@ -980,7 +782,6 @@ fun RealPostCard(
                 EngagementButton(
                     icon = Icons.Outlined.Comment,
                     label = "Comment",
-
                     onClick = onComment
                 )
                 EngagementButton(
@@ -989,7 +790,6 @@ fun RealPostCard(
                     onClick = onShare
                 )
             }
-
         }
     }
 }
@@ -998,7 +798,7 @@ fun RealPostCard(
 fun EngagementButton(
     icon: ImageVector,
     label: String,
-    isActive : Boolean = false,
+    isActive: Boolean = false,
     onClick: () -> Unit
 ) {
     val tintColor = if (isActive) {
@@ -1028,13 +828,13 @@ fun EngagementButton(
         )
     }
 }
+
 @Composable
 fun CommentRow(comment: CommentDto) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.Top
     ) {
-        // Avatar initials from authorName instead of userId
         val initials = comment.authorName
             .split(" ")
             .filter { it.isNotBlank() }
@@ -1059,14 +859,12 @@ fun CommentRow(comment: CommentDto) {
         Spacer(modifier = Modifier.width(8.dp))
 
         Column {
-            // commenter name
             Text(
                 text = comment.authorName,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = RussianViolet
             )
-            // comment text
             Text(
                 text = comment.content,
                 fontSize = 13.sp,
@@ -1076,11 +874,14 @@ fun CommentRow(comment: CommentDto) {
     }
 }
 
-
-
 fun formatTimestamp(timestamp: String): String {
     return try {
-        val instant = Instant.parse(timestamp)
+        val fixedTimestamp = if (!timestamp.endsWith("Z") && !timestamp.contains('+')) {
+            "${timestamp}Z"
+        } else {
+            timestamp
+        }
+        val instant = Instant.parse(fixedTimestamp)
         val now = Instant.now()
         val minutes = ChronoUnit.MINUTES.between(instant, now)
 

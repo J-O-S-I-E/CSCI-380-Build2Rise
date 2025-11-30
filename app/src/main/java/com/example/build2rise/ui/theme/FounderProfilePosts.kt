@@ -3,14 +3,24 @@ package com.example.build2rise.ui.theme
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PlayCircleOutline
+import androidx.compose.material.icons.filled.Description
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 
 /**
  * Card component for displaying a single founder post in grid
@@ -24,20 +34,80 @@ fun FounderPostCard(post: com.example.build2rise.data.model.PostResponse) {
             .padding(8.dp)
             .height(160.dp)
     ) {
+        // Display actual media based on post type
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(1f)
-                .background(Almond, RoundedCornerShape(8.dp)),
+                .clip(RoundedCornerShape(8.dp))
+                .background(Almond),
             contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = post.postType,
-                color = RussianViolet,
-                fontSize = 14.sp
-            )
+            when (post.postType) {
+                "image" -> {
+                    if (post.mediaUrl != null) {
+                        AsyncImage(
+                            model = post.mediaUrl,
+                            contentDescription = "Post image",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else {
+                        Text(
+                            text = "image",
+                            color = RussianViolet,
+                            fontSize = 14.sp
+                        )
+                    }
+                }
+                "video" -> {
+                    if (post.mediaUrl != null) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(RussianViolet.copy(alpha = 0.1f)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.PlayCircleOutline,
+                                    contentDescription = "Video",
+                                    tint = RussianViolet,
+                                    modifier = Modifier.size(48.dp)
+                                )
+                            }
+                        }
+                    } else {
+                        Text(
+                            text = "video",
+                            color = RussianViolet,
+                            fontSize = 14.sp
+                        )
+                    }
+                }
+                "text" -> {
+                    Icon(
+                        imageVector = Icons.Default.Description,
+                        contentDescription = "Text post",
+                        tint = RussianViolet.copy(alpha = 0.6f),
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
+                else -> {
+                    Text(
+                        text = post.postType,
+                        color = RussianViolet,
+                        fontSize = 14.sp
+                    )
+                }
+            }
         }
+
         Spacer(Modifier.height(4.dp))
+
         Text(
             text = post.postDescription?.take(20) ?: "Post",
             fontWeight = FontWeight.Bold,
@@ -45,6 +115,7 @@ fun FounderPostCard(post: com.example.build2rise.data.model.PostResponse) {
             fontSize = 12.sp,
             maxLines = 1
         )
+
         Text(
             text = formatPostTime(post.createdAt),
             color = Color.Gray,
@@ -55,16 +126,27 @@ fun FounderPostCard(post: com.example.build2rise.data.model.PostResponse) {
 
 fun formatPostTime(timestamp: String): String {
     return try {
-        val instant = java.time.Instant.parse(timestamp)
-        val now = java.time.Instant.now()
-        val days = java.time.temporal.ChronoUnit.DAYS.between(instant, now)
+        // Fix timestamp format - add 'Z' if missing
+        val fixedTimestamp = if (!timestamp.endsWith('Z') && !timestamp.contains('+')) {
+            "${timestamp}Z"
+        } else {
+            timestamp
+        }
+
+        val instant = Instant.parse(fixedTimestamp)
+        val now = Instant.now()
+        val days = ChronoUnit.DAYS.between(instant, now)
 
         when {
             days == 0L -> "updated today"
             days == 1L -> "updated yesterday"
             days < 7 -> "updated $days days ago"
-            days < 14 -> "updated last week"
-            else -> "updated ${days / 7} weeks ago"
+            days < 30 -> "updated ${days / 7} weeks ago"
+            else -> {
+                val formatter = DateTimeFormatter.ofPattern("MMM dd, yyyy")
+                    .withZone(ZoneId.systemDefault())
+                formatter.format(instant)
+            }
         }
     } catch (e: Exception) {
         "updated recently"

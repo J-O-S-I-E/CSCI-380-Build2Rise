@@ -11,9 +11,10 @@ import retrofit2.http.Header
 import com.example.build2rise.data.model.AddCommentRequest
 import com.example.build2rise.data.model.CommentDto
 import com.example.build2rise.data.model.UserInfo
-
-
-
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import retrofit2.http.Multipart
+import retrofit2.http.Part
 
 
 interface ApiService {
@@ -200,6 +201,15 @@ interface ApiService {
     suspend fun getPostById(
         @Header("Authorization") token: String,
         @Path("postId") postId: String
+    ): Response<PostResponse>
+
+    // Upload post with media
+    @Multipart
+    @POST("posts/upload")
+    suspend fun createPostWithMedia(
+        @Header("Authorization") token: String,
+        @Part("description") description: RequestBody?,
+        @Part file: MultipartBody.Part?
     ): Response<PostResponse>
 
 
