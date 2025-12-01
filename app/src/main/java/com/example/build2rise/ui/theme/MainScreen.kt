@@ -394,6 +394,35 @@ fun FounderProfileContent(
                 fontSize = 14.sp,
                 modifier = Modifier.clickable { onNavigateToConnections() }
             )
+
+            // Display About/Bio section using startup description
+            if (!profile.profileData?.description.isNullOrBlank()) {
+                Spacer(Modifier.height(16.dp))
+
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Almond.copy(alpha = 0.3f)
+                    ),
+                    shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(
+                            text = "About",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = RussianViolet
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        Text(
+                            text = profile.profileData?.description ?: "",
+                            fontSize = 14.sp,
+                            color = RussianViolet.copy(alpha = 0.8f),
+                            lineHeight = 20.sp
+                        )
+                    }
+                }
+            }
         }
 
         Spacer(Modifier.height(22.dp))
@@ -576,6 +605,46 @@ fun InvestorProfileContent(
                 fontSize = 14.sp,
                 modifier = Modifier.clickable { onNavigateToConnections() }
             )
+            // Display About/Bio section for investors
+            val investorBio = buildString {
+
+                val details = mutableListOf<String>()
+                profile.profileData?.industry?.let { details.add("Industry: $it") }
+                profile.profileData?.fundingStagePreference?.let { details.add("Focus: $it") }
+                profile.profileData?.investmentRange?.let { details.add("Investment Range: $it") }
+
+                if (details.isNotEmpty()) {
+                    append(details.joinToString("\n"))
+                }
+            }.trim()
+
+            if (investorBio.isNotBlank()) {
+                Spacer(Modifier.height(16.dp))
+
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Almond.copy(alpha = 0.3f)
+                    ),
+                    shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(
+                            text = "About",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = RussianViolet
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        Text(
+                            text = investorBio,
+                            fontSize = 14.sp,
+                            color = RussianViolet.copy(alpha = 0.8f),
+                            lineHeight = 20.sp
+                        )
+                    }
+                }
+            }
         }
 
         Spacer(Modifier.height(22.dp))
