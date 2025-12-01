@@ -41,10 +41,13 @@ fun MainScreen(userType: String = "founder") {
     var chatUserId by remember { mutableStateOf("") }
     var chatUserName by remember { mutableStateOf("") }
 
+    var showOtherUserProfile by remember { mutableStateOf(false) }
+    var viewingUserId by remember { mutableStateOf("") }
+
     Scaffold(
         bottomBar = {
             // Only show bottom nav if not viewing connections
-            if (!showConnectionsScreen && !showChatFromConnections) {
+            if (!showConnectionsScreen && !showChatFromConnections && !showOtherUserProfile) {
                 BottomNavigationBar(
                     selectedTab = selectedTab,
                     onTabSelected = { selectedTab = it }
@@ -59,6 +62,20 @@ fun MainScreen(userType: String = "founder") {
                 .padding(paddingValues)
         ) {
             when {
+                // ADD THIS: Show other user's profile
+                showOtherUserProfile -> {
+                    OtherUserProfileScreen(
+                        userId = viewingUserId,
+                        onBack = { showOtherUserProfile = false },
+                        onMessageClick = { userId, userName ->
+                            chatUserId = userId
+                            chatUserName = userName
+                            showOtherUserProfile = false
+                            showChatFromConnections = true
+                        }
+                    )
+                }
+
                 // Show chat from connections
                 showChatFromConnections -> {
                     ChatScreen(
@@ -86,8 +103,18 @@ fun MainScreen(userType: String = "founder") {
                 else -> {
                     // Switch between screens based on selected tab
                     when (selectedTab) {
-                        "Feed" -> FeedScreen()
-                        "Search" -> AISearchScreen()
+                        "Feed" -> FeedScreen(
+                            onProfileClick = { userId ->
+                                viewingUserId = userId
+                                showOtherUserProfile = true
+                            }
+                        )
+                        "Search" -> AISearchScreen(
+                            onProfileClick = { userId ->
+                                viewingUserId = userId
+                                showOtherUserProfile = true
+                            }
+                        )
 //                    "Messages" -> MessagesScreen()
                         "Messages" -> {
                             var showChatScreen by remember { mutableStateOf(false) }

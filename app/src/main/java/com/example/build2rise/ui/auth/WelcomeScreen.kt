@@ -8,13 +8,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.layout.ContentScale
 import com.example.build2rise.ui.theme.Almond
 import com.example.build2rise.ui.theme.Glaucous
 import com.example.build2rise.ui.theme.PureWhite
@@ -40,16 +40,18 @@ fun WelcomeScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // Logo placeholder - replace with actual logo
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // Coins icon placeholder
-                Text(
-                    text = "💰",
-                    fontSize = 48.sp
+                // UPDATED: Replace emoji with PNG image
+                Image(
+                    painter = painterResource(id = com.example.build2rise.R.drawable.logo_icon),
+                    contentDescription = "Build2Rise Logo",
+                    modifier = Modifier.size(80.dp),
+                    contentScale = ContentScale.Fit
                 )
+
                 Text(
                     text = "Build2Rise",
                     fontSize = 36.sp,
@@ -59,17 +61,21 @@ fun WelcomeScreen(
             }
         }
 
-        // Illustration placeholder
+        // UPDATED: Replace emoji illustration with PNG image
         Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(250.dp)
-                .background(Color.White.copy(alpha = 0.3f), RoundedCornerShape(16.dp)),
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .height(250.dp)
+//                .background(Color.White.copy(alpha = 0.3f), RoundedCornerShape(16.dp)),
             contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = "🚀",
-                fontSize = 80.sp
+            Image(
+                painter = painterResource(id = com.example.build2rise.R.drawable.welcome_image),
+                contentDescription = "Welcome Illustration",
+                modifier = Modifier
+                    .fillMaxWidth(0.9f)
+                    .height(280.dp),
+                contentScale = ContentScale.Fit
             )
         }
 
@@ -77,7 +83,8 @@ fun WelcomeScreen(
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(24.dp),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
         ) {
             // Tagline
             Column(

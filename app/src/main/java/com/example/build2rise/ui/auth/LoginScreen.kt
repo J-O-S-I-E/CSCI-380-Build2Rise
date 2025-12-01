@@ -1,5 +1,6 @@
 package com.example.build2rise.ui.auth
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -14,6 +15,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -122,15 +125,19 @@ fun LoginScreen(
 
             // Illustration placeholder
             Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(180.dp)
-                    .background(Color.White.copy(alpha = 0.3f), RoundedCornerShape(16.dp)),
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .height(180.dp)
+//                    .background(Color.White.copy(alpha = 0.3f), RoundedCornerShape(16.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = "🤝",
-                    fontSize = 64.sp
+                Image(
+                    painter = painterResource(id = com.example.build2rise.R.drawable.login_image),
+                    contentDescription = "login Illustration",
+                    modifier = Modifier
+                        .fillMaxWidth(0.9f)
+                        .height(280.dp),
+                    contentScale = ContentScale.Fit
                 )
             }
 

@@ -45,7 +45,8 @@ import kotlin.text.contains
 fun FeedScreen(
     postViewModel: PostViewModel = viewModel(),
     profileViewModel: ProfileViewModel = viewModel(),
-    messageViewModel: MessageViewModel = viewModel()
+    messageViewModel: MessageViewModel = viewModel(),
+    onProfileClick: (String) -> Unit = {}
 ) {
     var selectedTab by remember { mutableStateOf(0) }
     val tabs = listOf("Founders", "Investors")
@@ -112,6 +113,12 @@ fun FeedScreen(
             "${profile.firstName?.firstOrNull() ?: ""}${profile.lastName?.firstOrNull() ?: ""}".ifEmpty { "U" }
         }
         else -> "U"
+    }
+
+    // Get current user ID for comparing with post owners
+    val currentUserId = when (val state = profileState) {
+        is ProfileState.Success -> state.profile.userId
+        else -> null
     }
 
     // Show post creation modal
@@ -240,6 +247,7 @@ fun FeedScreen(
                             post = post,
                             isLiked = likedPostIds.contains(post.id),
                             comments = commentsForPost,
+                            currentUserId = currentUserId,
                             onLike = { postViewModel.likePost(post.id) },
                             onComment = {
                                 selectedPostIdForComment = post.id
@@ -249,7 +257,8 @@ fun FeedScreen(
                             onShare = {
                                 selectedPostForShare = post
                                 showShareDialog = true
-                            }
+                            },
+                            onProfileClick = onProfileClick
                         )
                     }
 
@@ -626,7 +635,9 @@ fun RealPostCard(
     comments: List<CommentDto>,
     onLike: () -> Unit,
     onComment: () -> Unit,
-    onShare: () -> Unit
+    onShare: () -> Unit,
+    onProfileClick: (String) -> Unit = {},
+    currentUserId: String?
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -646,7 +657,12 @@ fun RealPostCard(
             ) {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .weight(1f)
+                        .clickable {
+                            post.userId?.let { onProfileClick(it) }
+                        }
                 ) {
                     Box(
                         modifier = Modifier

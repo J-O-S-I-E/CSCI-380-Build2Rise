@@ -1,6 +1,7 @@
 package com.example.build2rise.ui.theme
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -39,7 +40,8 @@ fun AISearchScreen(
     searchViewModel: SearchViewModel = viewModel(),
     connectionViewModel: ConnectionViewModel = viewModel(),
     profileViewModel: ProfileViewModel = viewModel(),
-    projectViewModel: ProjectViewModel = viewModel()
+    projectViewModel: ProjectViewModel = viewModel(),
+    onProfileClick: (String) -> Unit = {}
 ) {
     var selectedUserType by remember { mutableStateOf<String?>(null) }
     var searchQuery by remember { mutableStateOf("") }
@@ -292,6 +294,9 @@ fun AISearchScreen(
                                     onSupportProject = {
                                         projectViewModel.supportProject(user.userId)
                                     },
+                                    onProfileClick = {  // ← ADDED THIS
+                                        onProfileClick(user.userId)
+                                    },
                                     searchQuery = searchQuery
                                 )
                             }
@@ -331,10 +336,13 @@ fun UserSearchCard(
     currentUserType: String?,
     onConnect: () -> Unit,
     onSupportProject: () -> Unit,
+    onProfileClick: () -> Unit = {},  // ← ADDED THIS PARAMETER
     searchQuery: String = ""
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onProfileClick() },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Almond),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
