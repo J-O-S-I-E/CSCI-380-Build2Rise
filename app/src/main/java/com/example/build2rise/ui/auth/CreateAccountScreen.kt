@@ -16,9 +16,13 @@ import androidx.compose.ui.unit.sp
 import com.example.build2rise.ui.theme.Almond
 import com.example.build2rise.ui.theme.PureWhite
 import com.example.build2rise.ui.theme.RussianViolet
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+
 
 @Composable
 fun CreateAccountScreen(
+    onBackClick: () -> Unit,
     onFounderSelected: () -> Unit,
     onInvestorSelected: () -> Unit
 ) {
@@ -27,6 +31,19 @@ fun CreateAccountScreen(
             .fillMaxSize()
             .background(Almond)
     ) {
+        // Back Button
+        IconButton(
+            onClick = onBackClick,
+            modifier = Modifier
+                .padding(top = 24.dp, start = 12.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.ArrowBack,
+                contentDescription = "Back",
+                tint = RussianViolet
+            )
+        }
+
         // Progress Indicator
         Row(
             modifier = Modifier

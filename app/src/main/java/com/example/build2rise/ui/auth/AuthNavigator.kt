@@ -68,6 +68,7 @@ fun AuthNavigator(
 
         AuthScreen.CreateAccount -> {
             CreateAccountScreen(
+                onBackClick = { currentScreen = AuthScreen.Login },
                 onFounderSelected = {
                     selectedUserType = "founder"
                     currentScreen = AuthScreen.FounderProfile
