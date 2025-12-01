@@ -230,6 +230,24 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
                 )
 
                 if (response.isSuccessful) {
+                    // INCREMENT COMMENT COUNT LOCALLY
+                    val currentState = _postState.value
+                    if (currentState is PostState.Success) {
+                        val updatedPosts = currentState.feed.posts.map { post ->
+                            if (post.id == postId) {
+                                post.copy(commentCount = post.commentCount + 1)
+                            } else {
+                                post
+                            }
+                        }
+
+                        _postState.value = PostState.Success(
+                            FeedResponse(
+                                posts = updatedPosts,
+                                totalCount = updatedPosts.size
+                            )
+                        )
+                    }
                     onSuccess()
                 } else {
                     // optional: handle error
@@ -255,12 +273,35 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
 
                 if (response.isSuccessful) {
                     response.body()?.let { interaction ->
+                        //updated liked status
                         _likedPostIds.update { current ->
                             if (interaction.likedByCurrentUser) {
                                 current + postId
                             } else {
                                 current - postId
                             }
+                        }
+                        // UPDATE THE POST COUNTS IN THE FEED
+                        val currentState = _postState.value
+                        if (currentState is PostState.Success) {
+                            val updatedPosts = currentState.feed.posts.map { post ->
+                                if (post.id == postId) {
+                                    post.copy(
+                                        likeCount = interaction.likeCount,
+                                        commentCount = interaction.commentCount,
+                                        shareCount = interaction.shareCount
+                                    )
+                                } else {
+                                    post
+                                }
+                            }
+
+                            _postState.value = PostState.Success(
+                                FeedResponse(
+                                    posts = updatedPosts,
+                                    totalCount = updatedPosts.size
+                                )
+                            )
                         }
                     }
                 } else {

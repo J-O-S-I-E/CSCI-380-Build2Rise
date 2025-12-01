@@ -793,17 +793,20 @@ fun RealPostCard(
                 EngagementButton(
                     icon = if (isLiked) Icons.Filled.ThumbUp else Icons.Outlined.ThumbUp,
                     label = "Like",
+                    count = post.likeCount,
                     isActive = isLiked,
                     onClick = onLike
                 )
                 EngagementButton(
                     icon = Icons.Outlined.Comment,
                     label = "Comment",
+                    count = post.commentCount,
                     onClick = onComment
                 )
                 EngagementButton(
                     icon = Icons.Outlined.Share,
                     label = "Share",
+//                    count = post.shareCount,
                     onClick = onShare
                 )
             }
@@ -815,6 +818,7 @@ fun RealPostCard(
 fun EngagementButton(
     icon: ImageVector,
     label: String,
+    count: Int? = null,
     isActive: Boolean = false,
     onClick: () -> Unit
 ) {
@@ -837,8 +841,15 @@ fun EngagementButton(
             modifier = Modifier.size(20.dp)
         )
         Spacer(modifier = Modifier.width(6.dp))
+
+        val displayText = if (count != null && count > 0) {
+            "$label ($count)"
+        } else {
+            label
+        }
+
         Text(
-            text = label,
+            text = displayText,
             fontSize = 13.sp,
             color = tintColor,
             fontWeight = FontWeight.Medium

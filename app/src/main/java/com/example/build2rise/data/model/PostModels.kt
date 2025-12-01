@@ -17,7 +17,10 @@ data class PostResponse(
     val mediaUrl: String?,
     val postingDate: String,
     val createdAt: String,
-    val likedByCurrentUser: Boolean = false
+    val likedByCurrentUser: Boolean = false,
+    val likeCount: Int = 0,
+    val commentCount: Int = 0,
+    val shareCount: Int = 0
 
 )
 
