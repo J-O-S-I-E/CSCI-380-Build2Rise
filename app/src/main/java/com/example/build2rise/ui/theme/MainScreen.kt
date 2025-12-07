@@ -109,7 +109,7 @@ fun MainScreen(userType: String = "founder") {
                                 showOtherUserProfile = true
                             }
                         )
-                        "Search" -> AISearchScreen(
+                        "Search" -> DiscoverScreen(
                             onProfileClick = { userId ->
                                 viewingUserId = userId
                                 showOtherUserProfile = true

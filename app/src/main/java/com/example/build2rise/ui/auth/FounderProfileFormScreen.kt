@@ -127,8 +127,43 @@ fun FounderProfileFormScreen(
                     onValueChange = { location = it },
                     placeholder = "Select Location",
                     options = listOf(
-                        "New York, NY", "San Francisco, CA", "Boston, MA",
-                        "Austin, TX", "Seattle, WA", "Remote", "Other"
+                        // === NORTH AMERICA ===
+                        "🇺🇸 New York, NY",
+                        "🇺🇸 San Francisco, CA",
+                        "🇺🇸 Boston, MA",
+                        "🇺🇸 Austin, TX",
+                        "🇺🇸 Seattle, WA",
+                        "🇺🇸 Los Angeles, CA",
+                        "🇺🇸 Chicago, IL",
+                        "🇺🇸 Miami, FL",
+                        "🇨🇦 Toronto, Canada",
+                        "🇨🇦 Vancouver, Canada",
+
+                        // === EUROPE ===
+                        "🇬🇧 London, UK",
+                        "🇩🇪 Berlin, Germany",
+                        "🇩🇪 Munich, Germany",
+                        "🇳🇱 Amsterdam, Netherlands",
+                        "🇫🇷 Paris, France",
+                        "🇪🇸 Barcelona, Spain",
+                        "🇸🇪 Stockholm, Sweden",
+                        "🇮🇪 Dublin, Ireland",
+                        "🇨🇭 Zurich, Switzerland",
+
+                        // === ASIA ===
+                        "🇸🇬 Singapore",
+                        "🇯🇵 Tokyo, Japan",
+                        "🇰🇷 Seoul, South Korea",
+                        "🇭🇰 Hong Kong",
+                        "🇮🇳 Bangalore, India",
+                        "🇮🇱 Tel Aviv, Israel",
+                        "🇦🇪 Dubai, UAE",
+
+                        // === OTHER ===
+                        "🇦🇺 Sydney, Australia",
+                        "🇧🇷 São Paulo, Brazil",
+                        "🇿🇦 Cape Town, South Africa",
+                        "🌍 Remote"
                     )
                 )
 
@@ -151,7 +186,7 @@ fun FounderProfileFormScreen(
                     placeholder = "Select Funding Stage",
                     options = listOf(
                         "Idea/Pre-seed", "Seed", "Series A",
-                        "Series B", "Series C+", "Bootstrapped"
+                        "Series B", "Series C+", "Bootstrapped", "Growth Stage"
                     )
                 )
 

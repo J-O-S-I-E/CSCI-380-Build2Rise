@@ -70,11 +70,11 @@ fun WelcomeScreen(
             contentAlignment = Alignment.Center
         ) {
             Image(
-                painter = painterResource(id = com.example.build2rise.R.drawable.welcome_image),
+                painter = painterResource(id = com.example.build2rise.R.drawable.welcomee),
                 contentDescription = "Welcome Illustration",
                 modifier = Modifier
                     .fillMaxWidth(0.9f)
-                    .height(280.dp),
+                    .height(300.dp),
                 contentScale = ContentScale.Fit
             )
         }

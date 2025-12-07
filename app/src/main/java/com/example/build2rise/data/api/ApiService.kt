@@ -11,6 +11,7 @@ import retrofit2.http.Header
 import com.example.build2rise.data.model.AddCommentRequest
 import com.example.build2rise.data.model.CommentDto
 import com.example.build2rise.data.model.UserInfo
+import com.google.gson.JsonObject
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.http.Multipart
@@ -212,9 +213,10 @@ interface ApiService {
         @Part file: MultipartBody.Part?
     ): Response<PostResponse>
 
-
-
-
-
+    @GET("matches/for-current-user")
+    suspend fun getMatchesForCurrentUser(
+        @Header("Authorization") token: String,
+        @Query("limit") limit: Int = 20
+    ): Response<MatchResult>
 
 }

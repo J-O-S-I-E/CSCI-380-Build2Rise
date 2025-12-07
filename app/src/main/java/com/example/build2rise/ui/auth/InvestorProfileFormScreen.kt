@@ -130,14 +130,49 @@ fun InvestorProfileFormScreen(
                     onValueChange = { geographicPreference = it },
                     placeholder = "Select Location",
                     options = listOf(
+                        // Broad regions
                         "Global",
-                        "United States",
                         "North America",
+                        "United States",
+                        "Canada",
                         "Europe",
                         "Asia",
                         "Latin America",
                         "Africa",
-                        "Remote Only"
+                        "Middle East",
+                        "Oceania",
+
+                        // Specific countries
+                        "United Kingdom",
+                        "Germany",
+                        "France",
+                        "Netherlands",
+                        "Spain",
+                        "Sweden",
+                        "Switzerland",
+                        "Singapore",
+                        "Japan",
+                        "South Korea",
+                        "India",
+                        "China",
+                        "Israel",
+                        "UAE",
+                        "Australia",
+                        "Brazil",
+                        "Mexico",
+                        "South Africa",
+
+                        // Major cities (if they only invest in specific cities)
+                        "San Francisco Bay Area",
+                        "New York City",
+                        "Boston",
+                        "London",
+                        "Berlin",
+                        "Singapore",
+                        "Tel Aviv",
+
+                        // Remote/distributed
+                        "Remote-friendly"
                     )
                 )
 
@@ -171,7 +206,8 @@ fun InvestorProfileFormScreen(
                         "Series A",
                         "Series B",
                         "Series C+",
-                        "Growth Stage"
+                        "Growth Stage",
+                        "Bootstrapped"
                     )
                 )
             }

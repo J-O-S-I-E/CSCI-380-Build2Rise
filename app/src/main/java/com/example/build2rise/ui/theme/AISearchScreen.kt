@@ -111,16 +111,6 @@ fun AISearchScreen(
                 .padding(paddingValues)
                 .padding(16.dp)
         ) {
-            // Header
-            Text(
-                "Discover",
-                fontSize = 28.sp,
-                fontWeight = FontWeight.Bold,
-                color = RussianViolet
-            )
-
-            Spacer(Modifier.height(16.dp))
-
             // Search Bar
             OutlinedTextField(
                 value = searchQuery,
