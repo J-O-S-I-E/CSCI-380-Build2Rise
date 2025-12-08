@@ -164,6 +164,11 @@ Recommended investors should align with the founder’s industry
 Funding stage Preferences should match (Seed, Series A, etc.)
 
 Geographic or sector preferences should influence recommendations.
+<p> 
+  <img width="147" height="572" alt="Screenshot 2025-12-07 163459" src="https://github.com/user-attachments/assets/063445de-5129-4691-bb40-bce434aca1dc" />
+  <img width="149" height="575" alt="Screenshot 2025-12-07 195906" src="https://github.com/user-attachments/assets/5ae7dc51-d9fa-443d-9510-63f4ee0cecba" />
+
+</p>
 
 
 ## Test Case 2: AI Smart Match - Investor to Founder
@@ -173,8 +178,10 @@ Description: This test checks if the AI Smart Match feature correctly analyzes a
 Expected Behavior:
 
 Recommended startups that align with the investor’s industry and region.
-
-
+<p> 
+<img width="147" height="577" alt="Screenshot 2025-12-07 183657" src="https://github.com/user-attachments/assets/140ed633-dd01-4a8e-9ad9-412bdf590945" />
+<img width="152" height="575" alt="Screenshot 2025-12-07 194413" src="https://github.com/user-attachments/assets/868fd33e-c22b-4c09-9891-1c4e4cc5a1a6" />
+</p>
 
 ## Test Case 3: Add a post to their feed
 
@@ -193,6 +200,11 @@ Tap “post.”
 Wait for an UI update
 
 Expected Results:
+<p> 
+<img width="147" height="583" alt="Screenshot 2025-12-07 163519" src="https://github.com/user-attachments/assets/a1afe1c4-0b19-4e5d-b8b6-be1bcd4ee8ad" />
+<img width="151" height="581" alt="Screenshot 2025-12-07 163625" src="https://github.com/user-attachments/assets/a31516da-aec2-4e0c-b7b8-6c74bfbed3f5" />
+<img width="150" height="578" alt="Screenshot 2025-12-07 163636" src="https://github.com/user-attachments/assets/74147409-cf7c-40ba-8352-63957bc1e298" />
+</p>
 
 
 ## Test Case 4: Investor Supports a Founder’s Project
@@ -210,6 +222,12 @@ Click on the support button
 Wait for confirmation message or UI Update
 
 Expected Results:
+<p>
+<img width="152" height="575" alt="Screenshot 2025-12-07 194413" src="https://github.com/user-attachments/assets/564d1226-a814-4afc-8e44-c72632b6e83e" />
+<img width="151" height="574" alt="Screenshot 2025-12-07 195146" src="https://github.com/user-attachments/assets/ce30ec4d-ebf1-4157-9cbc-0d4924e01d49" />
+<img width="149" height="573" alt="Screenshot 2025-12-07 195242" src="https://github.com/user-attachments/assets/d079a2ca-17d4-421c-9cd8-a47e691e4ad8" />
+
+</p>
 
 In the Investor’s Profile, the supported projects would be updated
 
@@ -228,7 +246,11 @@ Review the profiles of other users
 Tap on the “Connect” button
 
 Wait for confirmation message or UI Update
-
+<p>
+<img width="149" height="575" alt="Screenshot 2025-12-07 195906" src="https://github.com/user-attachments/assets/0581960a-a9c7-47fd-8016-2c34b405d0c8" />
+<img width="151" height="574" alt="Screenshot 2025-12-07 195146" src="https://github.com/user-attachments/assets/0fb60480-bec3-4bfd-ba1e-a3fae65d7194" />
+<img width="150" height="575" alt="Screenshot 2025-12-07 193928" src="https://github.com/user-attachments/assets/0e000223-b5fb-40c7-b63f-5934da743596" />
+</p>
 
 Expected Results:
 
@@ -237,7 +259,10 @@ The connection request is sent successfully
 This request can be viewed from their profile by clicking the “Connections” text
 
 The target user received a request in “My Connections” with the option to Accept or Decline the request.
-
+<p> 
+<img width="147" height="577" alt="Screenshot 2025-12-07 183657" src="https://github.com/user-attachments/assets/7af23285-ee5c-4d1d-ad29-b8e2e1f265ae" />
+<img width="151" height="576" alt="Screenshot 2025-12-07 182850" src="https://github.com/user-attachments/assets/f481bdb9-52db-4a7b-b25c-1d79bf437918" />
+</p>
 
 
 ## Test Case 6: Login & Load Feed
@@ -262,8 +287,13 @@ Click on the log-in button
 
 Expected Results:
 
+<p>
+<img width="148" height="580" alt="Screenshot 2025-12-07 163852" src="https://github.com/user-attachments/assets/f7aaafc4-66d2-4813-a967-4a0b77c7c9bc" />
+<img width="145" height="573" alt="Screenshot 2025-12-07 183305" src="https://github.com/user-attachments/assets/c051c643-2b9f-4eaa-aff9-6f8616258fa4" />
+<img width="150" height="575" alt="Screenshot 2025-12-07 183322" src="https://github.com/user-attachments/assets/4ab2f3b8-c5bf-40b4-946a-af87e99000cf" />
+<img width="150" height="578" alt="Screenshot 2025-12-07 163636" src="https://github.com/user-attachments/assets/5abe1919-4119-41f6-a082-ac03124d493c" />
 
-
+</p>
 
 
 ## Test Case 6: Signup & Load Feed
@@ -279,9 +309,12 @@ Open the app
 Click on the Sign up button
 
 Select your user type: Founder or Investor:
+<p>
+<img width="147" height="576" alt="Screenshot 2025-12-07 163904" src="https://github.com/user-attachments/assets/fbdbebd3-6e24-48a8-b4a6-dce78ed0545f" />
+<img width="150" height="578" alt="Screenshot 2025-12-07 180257" src="https://github.com/user-attachments/assets/9774e0bb-18aa-4f16-95fe-6f8f817ced2d" />
+</p>
 
 For Investor:
-
 
 Investors enter details about their investment style and preferences
 
@@ -292,14 +325,17 @@ Lastly confirm their account login credentials for future
 Then click on the “Create Account” button
 
 Expected Results:
+<p>
+<img width="143" height="574" alt="Screenshot 2025-12-07 180353" src="https://github.com/user-attachments/assets/3d0ae10e-d90c-47eb-a953-7bdf19dadddd" />
+<img width="149" height="580" alt="Screenshot 2025-12-07 154855" src="https://github.com/user-attachments/assets/132fcd55-db15-4ac3-bc17-53e3f93c492c" />
+
+</p>
 
 The user receives confirmation that their account has been created successfully.
 
 Suggested next steps appear, such as completing profile details or exploring the feed.
 
 Users may proceed directly to the Feed.
-
-
 
 
 
@@ -312,6 +348,10 @@ Then select the “Continue” button
 Lastly confirm their account login credentials for future 
 
 Then click on the “Create Account” button
+<p>
+<img width="146" height="569" alt="Screenshot 2025-12-07 154813" src="https://github.com/user-attachments/assets/8b63bb54-295c-45bd-83d1-64d3edb3ec5e" />
+<img width="149" height="580" alt="Screenshot 2025-12-07 154855" src="https://github.com/user-attachments/assets/132fcd55-db15-4ac3-bc17-53e3f93c492c" />
+</p>
 
 Expected Results:
 
@@ -320,9 +360,10 @@ The user receives confirmation that their account has been created successfully.
 Suggested next steps appear, such as completing profile details or exploring the feed.
 
 Users may proceed directly to the Feed.
-
-
-
+<p>
+<img width="145" height="578" alt="Screenshot 2025-12-07 155009" src="https://github.com/user-attachments/assets/c6744eab-0e5f-4016-8bd2-727b48770bd4" />
+<img width="145" height="576" alt="Screenshot 2025-12-07 155041" src="https://github.com/user-attachments/assets/f1aae0eb-eca2-49e1-8353-10c937d139c5" />
+</p>
 
 
 # 🛠 Technology Stack:
