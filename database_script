@@ -1,0 +1,139 @@
+
+
+CREATE TABLE public.connections (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  user1_id uuid NOT NULL,
+  user2_id uuid NOT NULL,
+  status character varying DEFAULT 'pending'::character varying,
+  connection_date timestamp with time zone DEFAULT now(),
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT connections_pkey PRIMARY KEY (id),
+  CONSTRAINT connections_user1_id_fkey FOREIGN KEY (user1_id) REFERENCES public.users(id),
+  CONSTRAINT connections_user2_id_fkey FOREIGN KEY (user2_id) REFERENCES public.users(id)
+);
+CREATE TABLE public.feed (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  user_id uuid NOT NULL,
+  post_id uuid NOT NULL,
+  display_order integer,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT feed_pkey PRIMARY KEY (id),
+  CONSTRAINT feed_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id),
+  CONSTRAINT feed_post_id_fkey FOREIGN KEY (post_id) REFERENCES public.posts(id)
+);
+CREATE TABLE public.founders (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  user_id uuid NOT NULL UNIQUE,
+  startup_name character varying NOT NULL,
+  industry character varying,
+  location character varying,
+  team_size character varying,
+  funding_stage character varying,
+  description text,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT founders_pkey PRIMARY KEY (id),
+  CONSTRAINT founders_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id)
+);
+CREATE TABLE public.investors (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  user_id uuid NOT NULL UNIQUE,
+  name_firm character varying NOT NULL,
+  industry character varying,
+  geographic_preference character varying,
+  investment_range character varying,
+  funding_stage_preference character varying,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT investors_pkey PRIMARY KEY (id),
+  CONSTRAINT investors_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id)
+);
+CREATE TABLE public.matches (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  founder_id uuid NOT NULL,
+  investor_id uuid NOT NULL,
+  match_score numeric,
+  match_date timestamp with time zone DEFAULT now(),
+  status character varying DEFAULT 'suggested'::character varying,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT matches_pkey PRIMARY KEY (id),
+  CONSTRAINT matches_founder_id_fkey FOREIGN KEY (founder_id) REFERENCES public.founders(id),
+  CONSTRAINT matches_investor_id_fkey FOREIGN KEY (investor_id) REFERENCES public.investors(id)
+);
+CREATE TABLE public.messages (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  sender_id uuid NOT NULL,
+  receiver_id uuid NOT NULL,
+  content text NOT NULL,
+  read_status boolean DEFAULT false,
+  timestamp timestamp with time zone DEFAULT now(),
+  created_at timestamp with time zone DEFAULT now(),
+  shared_post_id uuid,
+  CONSTRAINT messages_pkey PRIMARY KEY (id),
+  CONSTRAINT messages_sender_id_fkey FOREIGN KEY (sender_id) REFERENCES public.users(id),
+  CONSTRAINT messages_receiver_id_fkey FOREIGN KEY (receiver_id) REFERENCES public.users(id)
+);
+CREATE TABLE public.post_comments (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  post_id uuid NOT NULL,
+  user_id uuid NOT NULL,
+  content text NOT NULL,
+  created_at timestamp without time zone DEFAULT now(),
+  CONSTRAINT post_comments_pkey PRIMARY KEY (id),
+  CONSTRAINT post_comments_post_id_fkey FOREIGN KEY (post_id) REFERENCES public.posts(id)
+);
+CREATE TABLE public.post_likes (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  post_id uuid NOT NULL,
+  user_id uuid NOT NULL,
+  created_at timestamp without time zone DEFAULT now(),
+  CONSTRAINT post_likes_pkey PRIMARY KEY (id),
+  CONSTRAINT post_likes_post_id_fkey FOREIGN KEY (post_id) REFERENCES public.posts(id)
+);
+CREATE TABLE public.post_shares (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  post_id uuid NOT NULL,
+  user_id uuid NOT NULL,
+  created_at timestamp without time zone DEFAULT now(),
+  CONSTRAINT post_shares_pkey PRIMARY KEY (id),
+  CONSTRAINT post_shares_post_id_fkey FOREIGN KEY (post_id) REFERENCES public.posts(id)
+);
+CREATE TABLE public.posts (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  user_id uuid NOT NULL,
+  post_description text,
+  post_type character varying DEFAULT 'text'::character varying CHECK (post_type::text = ANY (ARRAY['text'::character varying, 'image'::character varying, 'video'::character varying]::text[])),
+  media_url text,
+  posting_date timestamp with time zone DEFAULT now(),
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  comment_count bigint DEFAULT '0'::bigint,
+  like_count bigint DEFAULT '0'::bigint,
+  share_count bigint DEFAULT '0'::bigint,
+  CONSTRAINT posts_pkey PRIMARY KEY (id),
+  CONSTRAINT posts_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id)
+);
+CREATE TABLE public.projects (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  founder_id uuid NOT NULL,
+  investor_id uuid NOT NULL,
+  status character varying NOT NULL DEFAULT 'interested'::character varying,
+  notes text,
+  created_at timestamp without time zone NOT NULL DEFAULT now(),
+  updated_at timestamp without time zone NOT NULL DEFAULT now(),
+  CONSTRAINT projects_pkey PRIMARY KEY (id),
+  CONSTRAINT projects_founder_id_fkey FOREIGN KEY (founder_id) REFERENCES public.founders(id),
+  CONSTRAINT projects_investor_id_fkey FOREIGN KEY (investor_id) REFERENCES public.investors(id)
+);
+CREATE TABLE public.users (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  email character varying NOT NULL UNIQUE,
+  password_hash character varying NOT NULL,
+  first_name character varying NOT NULL,
+  last_name character varying,
+  user_type character varying NOT NULL CHECK (user_type::text = ANY (ARRAY['founder'::character varying, 'investor'::character varying]::text[])),
+  profile_image_url text,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT users_pkey PRIMARY KEY (id)
+);
