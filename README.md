@@ -3,96 +3,13 @@
 Where innovation meets opportunity.  
 Build2Rise empowers founders and investors to discover each other through smart AI-driven matching, visual storytelling, and meaningful professional connections — all in one intuitive, social-inspired experience.
 
-# 👥 Team Members & Contributions
-Tanha: 
-
-Roles: Project Lead, Diagram Designer, UI Contributor, Front-End Contributor
-
-Specific Contributions: 
-
-Helped manage the project and designated tasks
-
-Contributed to the core app concept and feature ideation
-
-Participated in app theme color research, brainstorming and final selection
-
-Assisted in creating the ER diagram and fully developed the use case diagram for improved system clarity and planning
-
-Contributed to designing Figma wireframes
-
-Supported front-end development through component creation and UI refinement
-
-
-Zarrin:
-
-Roles: Documenter, UI Contributor, Front-End Developer, Back-end Developer
-
-Specific contributions:
-
-Contributed to the documentation of  DF diagrams, Use Case diagram, and ER diagram
-
-Contributed to the documentation of Figma design
-
-Set up the environment within Android Studio
-
-Contributed to the front-end development of our features
-
-Contributed to the back-end development of our features
-
-Expanded and updated the database schema to support new engagement features
-
-
-Chelsea:
-
-Roles: Documenter, Diagram Designer, UI Contributor, Front-End Developer
-
-Specific contributions:
-
-Contributed to the documentation of DF diagrams and ER diagram
-
-Contributed in the creation of the ER diagram
-
-Contributed to the front-end development of our features
-
-Developed custom AI-generated visuals used across the welcome and login interfaces
-
-Participated in app theme color research, brainstorming and final selection
-
-
-Joseann:
-
-Roles: Documenter, UI/UX Designer, Diagram Contributor
-
-Specific contributions:
-
-feature brainstorming informed by competitive analysis and UI/UX research of leading social and networking apps
-
-Generated multiple logo concepts and visual assets for the mobile app
-
-Created and maintained the Figma file and design libraries with prototyping
-
-Set up the GitHub repository and initialized the core Android Studio environment
-
-Contributed to the documentation of ERD and User Manual
-
-
-Evelyn: 
-
-Roles: Documenter, UI/UX Designer, Front-End & Backend Contributor, Database Integration
-
-Specific Contributions: 
-
-Contributed to the documentation of the system architecture, DF diagrams and ER diagrams.
-
-Contributed to creating UI/UX figma design
-
-Helped setup Supabase integration, authentication and image/video storage.
-
-Contributed to the front-end development of our features
-
-Structured backend/IntelliJ setup for team access and collaboration
-
-Helped build the backend and integrate them with the front-end UI.
+| Member | Roles | Specific Contributions |
+|--------|-------|----------------------|
+| **Tanha** | Project Lead, Diagram Designer, UI Contributor, Front-End Contributor | Helped manage the project and designated tasks; Contributed to the core app concept and feature ideation; Participated in app theme color research, brainstorming and final selection; Assisted in creating the ER diagram and fully developed the use case diagram; Contributed to designing Figma wireframes; Supported front-end development through component creation and UI refinement |
+| **Zarrin** | Documenter, UI Contributor, Front-End Developer, Back-End Developer | Contributed to the documentation of DF diagrams, Use Case diagram, and ER diagram; Contributed to the documentation of Figma design; Set up the environment within Android Studio; Contributed to front-end and back-end development of features; Expanded and updated the database schema to support new engagement features |
+| **Chelsea** | Documenter, Diagram Designer, UI Contributor, Front-End Developer | Contributed to the documentation of DF diagrams and ER diagram; Contributed in the creation of the ER diagram; Contributed to the front-end development of features; Developed custom AI-generated visuals for the welcome and login interfaces; Participated in app theme color research, brainstorming and final selection |
+| **Joseann** | Documenter, UI/UX Designer, Diagram Contributor | Feature brainstorming informed by competitive analysis and UI/UX research; Generated multiple logo concepts and visual assets for the mobile app; Created and maintained the Figma file and design libraries with prototyping; Set up the GitHub repository and initialized the core Android Studio environment; Contributed to the documentation of ERD and User Manual |
+| **Evelyn** | Documenter, UI/UX Designer, Front-End & Back-End Contributor, Database Integration | Contributed to the documentation of system architecture, DF diagrams and ER diagrams; Contributed to creating UI/UX Figma design; Helped set up Supabase integration, authentication and image/video storage; Contributed to front-end development of features; Structured backend/IntelliJ setup for team access and collaboration; Helped build the backend and integrate with the front-end UI |
 
 
 
@@ -122,35 +39,16 @@ Complete your profile to begin using the app.
 
 ## 🧭 How to use the app:
 
-### Feed: 
-After successfully signing up or logging in, users will land on the Feed, which is the first tab in the navigation bar. If the user is a founder, they can click the “+” icon on top of the feed to post about their startup via a picture, or a video, or a text post to the “Founders” section of the feed. If the user is an investor, they can click the “+” icon on top of the feed to post about looking for startups via a picture, or a video, or a text post to the “Investors” section of the feed. Both the founders and investors can view all the posts made in the Feed, but only the designated users can post to their designated feed, such as founders can only post on the “Founders” section of the feed and investors can only post on the “Investors” section of the feed. All users can like (by clicking the “Like” button) and comment (by clicking on the “Comment” button) on the posts in the Feed, as well as share those posts with their connections by clicking on the “Share” button. When a post is liked or commented on, the like count and the commented count increases and is shown to the users next to the said buttons, respectively. 
-
-### Search: 
-The second tab in the navigation bar is the “Search” tab. The “Search” page is divided into two sections, one is “Smart Match”, the other is “Search”. 
-
-In the “Smart Match” section, users will see that Google Gemini AI has presented a number of accounts for the founder or the investor, with other accounts that may have what they are looking for. AI will present to them the number of how many accounts a user is matched with based on deep profile analysis. The AI will also show users an average match score. It gives a 0-100% match score by analyzing industry, funding stage, location and team size capability. Matches above the 80% threshold represent an excellent match, while scores below 30% are filtered out. If AI said to the user that they smart matched with “2” users, smart match will show the profiles of those 2 users and will give the opportunity to connect and/or support those users. (Only users who are Investors will have the option to support Founders but every user, regardless of the type of users they are, can send a “Connection” request to other users). 
-
-In the “Search” section, users can filter their results by selecting the appropriate section before searching. For example, if someone is looking for FinTech investors, they can simply select Investors and type “FinTech”, only investors interested in FinTech will appear. Likewise, selecting Founders and searching “AI” will display only founders working in AI. 
-
-### Messages: 
-The third tab in the navigation bar is the “Messages” tab. In there, investors and founders can message other investors and founders once they make connections with one another. When going through the feed or looking up users manually through the “Search” feature or finding users in the Smart Match, if a user sees someone they would like to connect with, they can send one another a request and upon the user who receives the request accepts it, they can send one another messages. Investors can connect and message both other investors and founders, and founders can do the same. Messaging is only available between users who have connected with one another. 
-
-### Profile: 
-The last tab in the navigation bar is the “Profile” tab. 
-
-A founder’s profile page has their own Profile/Company/Product name. They also can click the “Connections” button to see all the people they are connected with which is done through sending and accepting connection requests between users. They also have an “About” tab under the “Connections” button where they can give a brief explanation of their startup and its goal. All of a Founder’s posts made and posted to the feed can be accessed under the “Posts” section in their profile. A founder’s one and only project can be found posted under the “Projects” section. A founder can make multiple regular posts, which can help them get the traction they need and find someone who will invest in them. Founders are limited to post one project under one account only. 
-
-An investor’s profile page has their own Profile/Company name. They also can click the “Connections” button to see all the people they are connected with which is done through sending and accepting connection requests between users. All of an Investor’s posts made and posted to the feed can be accessed under the “Posts” section in their profile. The projects an investor is supporting can be found under the “Supported Projects” section. An investor can make multiple posts, which can help them find companies/products they can invest into. An investor can support more than one project.
-
-### Log out: 
-both user types, investors and founders can log out of their accounts by clicking the log out button on the top right corner of their own profile page. 
-
-
+| Feature | Description | Founder Access | Investor Access | Both |
+|---------|-------------|---------------|-----------------|------|
+| **Feed** | The first tab in the navigation bar; displays all posts from founders and investors | Can post pictures, videos, or text to the "Founders" section only | Can post pictures, videos, or text to the "Investors" section only | Can view all posts; can like, comment, and share any post; like and comment counts are visible |
+| **Search** | The second tab in the navigation bar; divided into "Smart Match" and "Search" sections | Smart Match shows matched investor profiles; can send connection requests | Smart Match shows matched founder profiles; can send connection requests and support founders | Can filter search by user type (Founder/Investor) and keyword (e.g., "FinTech", "AI"); AI match score (0–100%) based on industry, funding stage, location, and team size; scores below 30% filtered out, above 80% flagged as excellent |
+| **Messages** | The third tab in the navigation bar; enables direct messaging between connected users | Can message connected founders and investors | Can message connected founders and investors | Messaging is only available between mutually connected users; connection requires a sent and accepted request |
+| **Profile** | The last tab in the navigation bar; displays user info, posts, and projects | Has About tab (startup description); Posts section; limited to one project under "Projects" | Has Posts section; can support multiple projects shown under "Supported Projects" | Shows profile/company name; Connections button to view all connections; Log out button on top right corner |
 
 # 🧪 Testing Strategies and Test Cases:
 
 To ensure that the Build2Rise platform works reliably for both Founder and Investors, several types of testing strategies were used throughout development. These strategies have helped validate that the app’s core features, account creation, posting updates, showcasing projects and supporting startups, function correctly and provide a smooth user experience.
-
 
 
 ## Test Case 1: AI Smart Match - Founder to Investor
